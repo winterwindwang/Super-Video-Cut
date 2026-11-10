@@ -1,0 +1,9 @@
+# Normalize to LF in the repository; shell scripts must keep LF to run cross-platform
+* text=auto eol=lf
+
+*.sh text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.csv text eol=lf

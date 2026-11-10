@@ -1,0 +1,141 @@
+# mdc-v1 · 素材描述卡（空模板）
+# 用法：复制本文件 → 按 01-素材描述卡规范.md 逐项填写 → validate → register
+# 约定：本卡主题中立；E1 客观 / E2 可指认事实 / E3 解释性推断 / E4 猜测
+# 禁止：无凭证地名、身份猜测、具体主题名/项目名、大段抄录台词
+# 本卡不构成法律意见；授权与肖像结论须人工复核。
+
+mdc_version: mdc-v1
+material_id: MID-000000000000        # sha256 前 12 位小写，由 fingerprint 生成
+
+identity:                            # 全为 E1，由 fingerprint / ffprobe 自动填
+  content_hash: "sha256:"
+  hash_mode: sampled                # sampled | full
+  size_bytes: 0
+  duration_s: 0.0
+  container: ""
+  vcodec: ""
+  resolution: ""
+  fps: ""
+  pix_fmt: ""
+  acodec: ""
+  sample_rate: ""
+  channels: 0
+  aliases: []
+  source_path_hint: ""
+  first_registered: "2026-11-10"
+  last_verified: "2026-11-10"
+
+content:                             # 讲了什么
+  summary: ""                       # ≤80 字，主谓宾齐全，不写评价词
+  subjects: []                      # 人/物/场景主体，只写可指认特征
+  actions: []
+  timeline:                         # 至少 3 个锚点，长素材每 15-30 s 一个
+    - tc: "00:00:00.000"
+      event: ""
+      evidence: E2
+  spoken:
+    has_speech: unknown             # yes | no | unknown
+    language: ""
+    key_lines: []                   # 只写要点 + 时间码，不抄长台词
+    transcript_ref: ""
+  onscreen_text: []                 # {tc, text}
+  affordances: []                   # 中立用途标签：空镜/人物表情/产品特写/动作过程/环境气氛/数据画面/同期声
+  notable_absences: []              # 明确「没有」的东西，检索时很有用
+
+where:                              # 在哪里拍
+  setting_type: unknown            # indoor | outdoor | studio | nature | screen_capture | virtual | unknown
+  place_name: null                 # 无 E2 凭证必须为 null
+  place_basis: ""                  # 画面内文字/可识别地标/EXIF GPS/拍摄记录/甲方书面说明
+  landmarks: []
+  environment:
+    time_of_day: unknown
+    weather: unknown
+    season: unknown
+    light_direction: unknown
+    light_quality: unknown
+    background: ""
+    props: []
+  camera:
+    position: unknown
+    angle: unknown
+    height: unknown
+    movement: unknown
+    stability: unknown
+  geo_hint: null
+  inference_note: ""               # 所有 E3 推断集中写：依据 + 置信度 + 可证伪条件
+
+style:                              # 是什么样的
+  genre: unknown                   # 纪实/剧情/广告/屏录/监控/动画/用户生成
+  visual:
+    shot_sizes: []
+    composition: ""
+    movement: ""
+    stability: ""
+    color_palette: []
+    contrast: unknown
+    saturation: unknown
+    white_balance: unknown
+    grain: unknown
+    era_feel: ""
+  measured:                        # E1，来自 reference_probe.sh / qc_scan.sh
+    shot_median_s: 0.0
+    cuts_per_min: 0.0
+    integrated_lufs: 0.0
+    true_peak_dbtp: 0.0
+    yavg: 0.0
+    satavg: 0.0
+  audio:
+    music: unknown
+    ambience: ""
+    sfx: []
+    voice: ""
+    noise_floor: ""
+    has_music_bed: unknown
+  mood: []                         # ≤3 个，每个配一条画面/声音依据
+  rhythm: ""
+  style_notes:                     # 每条五段式，缺一段作废
+    - 观察: ""
+      依据: ""
+      推断: ""
+      动作项: ""
+      置信度: ""
+  similarity_caveat: ""
+
+usability:                          # 能不能用
+  provenance:
+    origin: unknown                # self_shot | stock | client | archive | ugc | unknown
+    acquired_from: ""
+    license_ref: ""                # 指向凭证文件路径，不内嵌敏感信息
+  rights_status: unknown           # cleared | pending | restricted | blocked | unknown
+  rights_expiry: null
+  releases:
+    portrait: unknown
+    minor_guardian: na
+    location: unknown
+    trademark: na
+    music: na
+  quality_issues: []               # {tc, issue}：黑场/静音/抖动/失焦/过曝/水印/音画不同步
+  edit_notes:
+    best_ranges: []
+    avoid_ranges: []
+    handles_frames: 12
+    continuity_risks: []
+  qc_ref: ""
+  privacy_flags: []                # 人脸/车牌/门牌/证件/屏幕内个人信息
+
+meta:
+  model: ""
+  prompt_ref: "模板/模型分析提示词.md"
+  analyzed_at: "2026-11-10"
+  analyst: ""
+  card_version: 1
+  status: unverified               # active | superseded | blocked | unverified
+  supersedes: null
+  corrections: []                  # {ts, field, old, new, basis, signoff}
+
+constraints:
+  no_expression_copy: true
+  theme_neutrality: true
+  no_geo_guess: true
+  no_identity_guess: true
+  no_use_until_cleared: true       # rights_status 非 cleared 时必须为 true

@@ -74,16 +74,16 @@ super-video-cut/
 ├── README.zh-CN.md       # 中文说明
 ├── references/           # 十个专题卷，按需加载
 │   ├── INDEX.md          # 按阶段的最短路径
-│   ├── 00-总览/           # 能力域映射、证据分级、文件清单
-│   ├── 01-剪辑技巧/       # 镜头语言、节奏、工程规范、调色
-│   ├── 02-配音与音频/     # 录制、混音、响度、配乐、AI 配音
-│   ├── 03-字幕系统/       # 排版、格式标准、工具流、无障碍
-│   ├── 04-分类型剪辑/     # 六类视频的结构时间轴模板
-│   ├── 05-版权法规/       # 著作权、合理使用、授权、平台规则
-│   ├── 06-成片审查/       # 技术清单、内容合规、审查表
-│   ├── 07-工具与资源/     # 软件生态、素材与字体授权
-│   ├── 08-RSI自进化/      # 参考片评估、风格指纹、反馈闭环
-│   └── 09-素材记忆/       # 素材描述卡与缓存协议
+│   ├── 00-overview/           # 能力域映射、证据分级、文件清单
+│   ├── 01-editing-craft/       # 镜头语言、节奏、工程规范、调色
+│   ├── 02-audio-and-voice/     # 录制、混音、响度、配乐、AI 配音
+│   ├── 03-subtitles/       # 排版、格式标准、工具流、无障碍
+│   ├── 04-genre-playbooks/     # 六类视频的结构时间轴模板
+│   ├── 05-copyright/       # 著作权、合理使用、授权、平台规则
+│   ├── 06-delivery-qc/       # 技术清单、内容合规、审查表
+│   ├── 07-tools-and-resources/     # 软件生态、素材与字体授权
+│   ├── 08-rsi/      # 参考片评估、风格指纹、反馈闭环
+│   └── 09-material-memory/       # 素材描述卡与缓存协议
 └── scripts/
     ├── material_cache.py     # 指纹 / 查询 / 登记 / 复用 / 校验 / 统计
     ├── reference_probe.sh    # 切点、镜头时长、响度、色彩、抽帧拼图
@@ -100,7 +100,7 @@ super-video-cut/
 SK="$HOME/.workbuddy/skills/super-video-cut"
 
 # 一次分析，多主题复用
-export MDC_HOME="$PWD/素材缓存"
+export MDC_HOME="$PWD/material-cache"
 python "$SK/scripts/material_cache.py" lookup "素材.mp4"
 
 # 测出参考片的客观特征
@@ -110,11 +110,11 @@ bash "$SK/scripts/reference_probe.sh" "参考片.mp4" "probe_out"
 bash "$SK/scripts/qc_scan.sh" "成片.mp4" "qc_out"
 ```
 
-`material_cache.py` 的缓存写在 `$MDC_HOME`（默认 `./素材缓存`），**不会写进 skill 安装目录**。
+`material_cache.py` 的缓存写在 `$MDC_HOME`（默认 `./material-cache`），**不会写进 skill 安装目录**。
 
 ## 证据，而非权威
 
-库里的数字都带证据等级：**A** 标准或法规原文、**B** 厂商官方文档、**C** 学术、**D** 媒体转述。不确定的一律标"待核实"，不当作事实陈述。详见 `references/00-总览/资料来源与可信度.md`。
+库里的数字都带证据等级：**A** 标准或法规原文、**B** 厂商官方文档、**C** 学术、**D** 媒体转述。不确定的一律标"待核实"，不当作事实陈述。详见 `references/00-overview/sources-and-reliability.md`。
 
 ## 适用范围与局限
 

@@ -1,0 +1,57 @@
+path,category,topic,type,updated,notes
+../SKILL.md,Overview,Main skill file: workflow / red lines / routing,index,2026-11-10,Skill entry point
+INDEX.md,Navigation,Shortest-path routing by stage and task,index,2026-11-10,Read this first when entering the directory
+00-overview/knowledge-map.md,Overview,Capability domain structure and end-to-end document routing,guide,2026-11-10,Includes the one-page parameter quick reference
+00-overview/sources-and-reliability.md,Overview,Source grading and a register of about 168 TO VERIFY items,governance,2026-11-10,P0/P1/P2 review priority
+01-editing-craft/01-shot-language-and-theory.md,Editing craft,Continuity editing / 180-degree line / 30-degree rule / match cuts / montage,reference,2026-11-10,4 TO VERIFY items (rule-of-thumb thresholds)
+01-editing-craft/02-transitions-rhythm-and-timing.md,Editing craft,Transition types and frame counts / J-cut and L-cut / beat sync / frame-level precision,reference,2026-11-10,4 TO VERIFY items (transition frame counts are rule-of-thumb values)
+01-editing-craft/03-editing-workflow-and-project-standards.md,Editing craft,Asset ingest / proxies / naming and versions / interchange formats / 3-2-1 backup,reference,2026-11-10,7 TO VERIFY items (standard numbers and editions)
+01-editing-craft/04-color-grading-and-image-quality.md,Editing craft,Primary and secondary grading / scopes / Log and LUT / colour spaces / HDR,reference,2026-11-10,8 TO VERIFY items (ITU and SMPTE edition numbers)
+02-audio-and-voice/01-voice-recording-and-delivery.md,Voice and audio,Voice production and breath / to-camera delivery / ADR / microphones and room treatment / 48 kHz 24-bit,reference,2026-11-10,5 TO VERIFY items (rule-of-thumb values)
+02-audio-and-voice/02-audio-post-and-mixing.md,Voice and audio,Vocal processing chain / EBU R128 / ATSC A85 / streaming loudness / loudnorm,reference,2026-11-10,8 TO VERIFY items (the new A85 edition and Tech 3344)
+02-audio-and-voice/03-music-sfx-and-sound-design.md,Voice and audio,BPM beat sync / sound-effect layering / Foley / ducking / panning,reference,2026-11-10,5 TO VERIFY items (rule-of-thumb levels)
+02-audio-and-voice/04-ai-voice-and-tts.md,Voice and audio,TTS selection / SSML / polyphonic characters / voice-cloning compliance / human-machine hybrid,reference,2026-11-10,7 TO VERIFY items (engine terms and regulatory status)
+03-subtitles/01-subtitle-style-and-layout.md,Subtitles,Line and character counts / on-screen duration / CPS / safe area / typeface and outline / bilingual subtitles,reference,2026-11-10,10 TO VERIFY items (Netflix and BBC figures are second-hand)
+03-subtitles/02-subtitle-format-standards.md,Subtitles,SRT/WebVTT/ASS/TTML/SCC structure and timecode / soft and burned-in subtitles,reference,2026-11-10,3 TO VERIFY items (608 control codes and language tags)
+03-subtitles/03-subtitle-tooling-and-workflow.md,Subtitles,Aegisub / Subtitle Edit / Whisper / forced alignment / ffmpeg burn-in and muxing,reference,2026-11-10,4 TO VERIFY items (alignment accuracy and versions)
+03-subtitles/04-multilingual-and-accessibility.md,Subtitles,Translated subtitles / CC / SDH / WCAG 2.2 / ISO 639 track naming,reference,2026-11-10,3 TO VERIFY items (legal obligations and conflicting specifications)
+04-genre-playbooks/01-short-form-and-vlog.md,Genre playbooks,Hook in the first 3 seconds / 9:16 safe area / completion rate / pacing density,playbook,2026-11-10,10 TO VERIFY items (conflicting platform specifications)
+04-genre-playbooks/02-interview-documentary-and-portrait.md,Genre playbooks,Multicam sync / jump cuts / B-roll / sync sound / editing ethics,playbook,2026-11-10,4 TO VERIFY items
+04-genre-playbooks/03-ads-and-brand-films.md,Genre playbooks,30/15/6 s cutdowns / information hierarchy / CTA / Advertising Law risk,playbook,2026-11-10,5 TO VERIFY items (penalty conventions)
+04-genre-playbooks/04-tutorials-and-explainer.md,Genre playbooks,Screen recording / punch-ins / split screen / chapters / information density / accessibility,playbook,2026-11-10,2 TO VERIFY items
+04-genre-playbooks/05-live-clips-and-variety.md,Genre playbooks,Multi-track organisation / joke timing / kinetic type and sound effects / clip licensing,playbook,2026-11-10,5 TO VERIFY items (licensing routes and legal conclusions)
+04-genre-playbooks/06-narrative-short-and-music-video.md,Genre playbooks,Narrative structure / music sync / lyric subtitles / lip sync / stylised grading,playbook,2026-11-10,6 TO VERIFY items
+05-copyright/01-china-copyright-law-and-audiovisual-works.md,Copyright and law,Core provisions of the 2020 amendment / ownership of audiovisual works / 13 fair-use items / infringement liability,legal,2026-11-10,7 TO VERIFY items; includes a disclaimer; not legal advice
+05-copyright/02-derivative-edits-and-fair-use.md,Copyright and law,Risk tiers for clip edits / mashups / commentary and roundups / appropriate quotation / three-step test / decision tree,legal,2026-11-10,9 TO VERIFY items; most cases come from media reports; not legal advice
+05-copyright/03-music-sfx-and-recording-licensing.md,Copyright and law,Three layers of music rights / collective management / platform music libraries / CC and royalty-free,legal,2026-11-10,10 TO VERIFY items; not legal advice
+05-copyright/04-likeness-fonts-stock-and-personality-rights.md,Copyright and law,Portrait and voice rights / commercial use of typefaces / stock licensing / AI-generated works / minors,legal,2026-11-10,13 TO VERIFY items; article numbers and cases need verification; not legal advice
+05-copyright/05-platform-rules-and-cross-border-compliance.md,Copyright and law,Domestic platform rules / notice and takedown / DMCA / Content ID / DSM Article 17,legal,2026-11-10,12 TO VERIFY items; not legal advice
+06-delivery-qc/01-technical-spec-checklist.md,Delivery QC,16-point specification sheet / ffprobe / black frames / silence and freeze frames / loudness / frame extraction / mandatory human checks,checklist,2026-11-10,Commands verified on ffmpeg 8.1.2
+06-delivery-qc/02-content-and-compliance-review.md,Delivery QC,Asset ledger / rights chain / content compliance / risk grading / audit trail,checklist,2026-11-10,Includes a disclaimer; not legal advice
+06-delivery-qc/03-qc-report-templates.md,Delivery QC,Fillable Tables A to G / CSV template fields / script usage,template,2026-11-10,Complete item by item and sign off before delivery
+../scripts/qc_scan.sh,Delivery QC,Automated detection script (specification / decode / black frames / silence / loudness / frame extraction),script,2026-11-10,Verified end to end
+07-tools-and-resources/01-nle-software-and-plugins.md,Tools and resources,Premiere / Resolve / FCP / Avid / CapCut (剪映) / ffmpeg / hardware,reference,2026-11-10,3 TO VERIFY items (pricing and hardware)
+07-tools-and-resources/02-stock-assets-and-learning-resources.md,Tools and resources,Stock site licence types / music libraries / font licensing / standards documentation and bibliography,reference,2026-11-10,8 TO VERIFY items (licensing must be checked independently)
+08-rsi/README.md,RSI self-evolution,P0 trigger protocol quick reference and a three-dimension evaluation overview,index,2026-11-10,Entry point
+08-rsi/01-overview-and-design-principles.md,RSI self-evolution,Six-layer architecture / nine-step loop / seven hard guardrails / compliance first,design,2026-11-10,Includes a disclaimer; not legal advice
+08-rsi/02-reference-video-evaluation-framework.md,RSI self-evolution,Editing technique / sound design / scene — the three dimensions and the mandatory five-part rationale,core,2026-11-10,Core volume; probe thresholds are rule-of-thumb values still TO VERIFY
+08-rsi/03-style-fingerprint-spec.md,RSI self-evolution,sfp-v1 YAML schema and V1-V8 validation,spec,2026-11-10,Sample data is fabricated for illustration
+08-rsi/04-fingerprint-to-edit-plan-mapping.md,RSI self-evolution,Conflict resolution P0-P7 / asset downgrade / L4 deviation tolerance,spec,2026-11-10,Tolerances are starting suggestions
+08-rsi/05-feedback-loop-and-self-improvement.md,RSI self-evolution,Error attribution / weight updates / nine-step gate / drift control / kill switch,algorithm,2026-11-10,Parameters such as eta are initial values set in-house
+08-rsi/06-case-library-and-version-governance.md,RSI self-evolution,Directory naming / rule versions / audit log / rollback,governance,2026-11-10,In-house conventions rather than an industry standard
+08-rsi/templates/reference-video-evaluation.md,RSI self-evolution,Fillable evaluation sheet — A-B-C with 10 items each plus D-E-F-G,template,2026-11-10,Every item needs a five-part rationale
+08-rsi/templates/style-fingerprint.yaml,RSI self-evolution,Copy-ready empty style fingerprint template,template,2026-11-10,YAML format
+08-rsi/templates/self-improvement-record.md,RSI self-evolution,Prediction vs. actual / attribution / candidates / gate record template,template,2026-11-10,A single case only produces a candidate
+../scripts/reference_probe.sh,RSI self-evolution,Objective probe script for reference videos,script,2026-11-10,Verified end to end; avoid absolute metadata paths on Windows
+08-rsi/case-library/README.md,RSI self-evolution,Case index and rule version table,index,2026-11-10,No cases yet; no rule change may be approved before the frozen set exists
+09-material-memory/README.md,Material memory,The P0 protocol for analysing once and reusing across topics plus the token saving,index,2026-11-10,Entry point
+09-material-memory/01-material-description-card-spec.md,Material memory,mdc-v1 field dictionary / E1-E4 / five-part rationale / V1-V8 validation,spec,2026-11-10,In-house conventions rather than an industry standard; includes a disclaimer
+09-material-memory/02-cache-reuse-protocol-and-token-savings.md,Material memory,Hit and invalidation state machine / content hashing / single-pass write / token accounting / concurrency and privacy,protocol,2026-11-10,Conflicting token-rate figures are marked TO VERIFY
+09-material-memory/03-multi-topic-adaptation-and-references.md,Material memory,L1-L2 layering / adaptation fields / reference counts / conflicts and revocation / corrections written back,governance,2026-11-10,In-house conventions rather than an industry standard
+09-material-memory/04-integration-with-rsi-and-other-volumes.md,Material memory,L0 persistence / guardrail 8 / new meta-metrics / library-wide routing,integration,2026-11-10,Includes a disclaimer; not legal advice
+09-material-memory/templates/material-description-card.yaml,Material memory,Empty mdc-v1 card (for tool registration),template,2026-11-10,YAML format
+09-material-memory/templates/material-description-card.md,Material memory,Human-readable filling guide with a complete worked example,template,2026-11-10,Sample data is fabricated
+09-material-memory/templates/model-analysis-prompt.md,Material memory,The prompt for the single full model request made on a MISS,template,2026-11-10,Core template; tune it per model
+09-material-memory/templates/topic-adaptation-record.md,Material memory,L2 record template — one asset per topic,template,2026-11-10,Includes a five-part rationale
+../scripts/material_cache.py,Material memory,Zero-dependency cache tool (8 subcommands),script,2026-11-10,Verified end to end; Python standard library only
+09-material-memory/cache/README.md,Material memory,Cache directory / index and usage fields / append-only and privacy conventions,index,2026-11-10,Cache data is maintained by the tooling itself

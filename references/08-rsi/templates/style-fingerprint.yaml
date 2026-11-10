@@ -1,0 +1,142 @@
+# Style-fingerprint template · sfp-v1
+# Usage: copy this file to case-library/<CASE-ID>/style-fingerprint.yaml, then fill it in.
+# Rule: fill in only the parameters the G filter tagged transferable; low-confidence items may live only in hypotheses.
+# Each parameter should use the { value, evidence, confidence, source, note } structure.
+# Validation: see V1–V8 in ../03-style-fingerprint-spec.md.
+
+sfp_version: sfp-v1
+id: SFP-YYYYMMDD-NNN
+created: YYYY-MM-DD
+source_case: CASE-YYYYMMDD-NNN
+
+reference:
+  title: ""
+  duration_s: 0
+  platform: ""
+  genre: ""                       # which book of ../04-genre-playbooks/ this maps to
+  probe_log: ""                   # case-library/<CASE-ID>/probe.log
+  assessment: ""                  # case-library/<CASE-ID>/evaluation.md
+
+evidence_summary:
+  e1_ratio: 0.0                   # share of objective-evidence entries
+  e3_count: 0                     # number of interpretive inferences
+  low_confidence_count: 0
+  overall_confidence: medium      # high / medium / low
+
+# ---------- A Editing craft ----------
+edit:
+  shot_median_s:       { value: 0, evidence: E1, confidence: medium, source: "A1", note: "" }
+  shot_p90_s:          { value: 0, evidence: E1, confidence: medium, source: "A1", note: "" }
+  cut_density_per_min: { value: 0, evidence: E1, confidence: medium, source: "A2", note: "" }
+  density_curve:       { value: [], evidence: E1, confidence: medium, source: "A2", note: "cuts/min per quarter-segment" }
+  cut_anchor_distribution:
+    value: { action: 0, dialogue_break: 0, beat: 0, other: 0 }
+    evidence: E1+E2
+    confidence: medium
+    source: "A3"
+    note: ""
+  transition_mix:
+    value: { hard_cut: 0, dissolve: 0, wipe: 0, match: 0 }
+    evidence: E2
+    confidence: medium
+    source: "A4"
+    note: ""
+  dissolve_frames:     { value: 0, evidence: E2, confidence: medium, source: "A4", note: "" }
+  scale_progression:   { value: "", evidence: E2, confidence: medium, source: "A5", note: "" }
+  camera_motion:       { value: "", evidence: E2, confidence: medium, source: "A6", note: "" }
+  jl_cut_frames:       { value: [], evidence: E2, confidence: medium, source: "A7", note: "[min, max]" }
+  broll_ratio:         { value: 0, evidence: E2, confidence: medium, source: "A8", note: "" }
+  beat_align_frame_error: { value: 0, evidence: E1+E2, confidence: medium, source: "A9", note: "" }
+  fps:                 { value: 0, evidence: E1, confidence: high, source: "A10 / ffprobe", note: "" }
+  slowmo_segments:     { value: [], evidence: E2, confidence: medium, source: "A10", note: "" }
+
+# ---------- B Sound effects and sound design ----------
+audio:
+  bpm:                 { value: 0, evidence: E2, confidence: medium, source: "B1", note: "" }
+  mood:                { value: "", evidence: E3, confidence: low, source: "B1", note: "inference, reference only" }
+  music_in_s:          { value: 0, evidence: E2, confidence: medium, source: "B2", note: "" }
+  drop_align_s:        { value: 0, evidence: E2, confidence: medium, source: "B2", note: "" }
+  voice_type:          { value: "", evidence: E2, confidence: medium, source: "B3", note: "" }
+  speech_ratio:        { value: 0, evidence: E2, confidence: medium, source: "B3", note: "" }
+  sfx_per_10s:         { value: 0, evidence: E2, confidence: medium, source: "B4", note: "" }
+  sfx_types:           { value: [], evidence: E2, confidence: medium, source: "B4", note: "" }
+  sfx_cut_coupling:    { value: 0, evidence: E1+E2, confidence: medium, source: "B5", note: "" }
+  music_duck_db:       { value: 0, evidence: E2, confidence: medium, source: "B6", note: "" }
+  integrated_lufs:     { value: 0, evidence: E1, confidence: high, source: "B7 / ebur128 Summary", note: "" }
+  true_peak_dbtp:      { value: 0, evidence: E1, confidence: high, source: "B7", note: "" }
+  sound_bridge:        { value: false, evidence: E2, confidence: medium, source: "B8", note: "" }
+  intentional_silence: { value: [], evidence: E1+E2, confidence: medium, source: "B9", note: "human-confirmed as intentional" }
+  playback_target:     { value: "", evidence: E3, confidence: medium, source: "B10", note: "" }
+
+# ---------- C Scene and image ----------
+scene:
+  count:               { value: 0, evidence: E2, confidence: medium, source: "C1", note: "" }
+  duration_dist:       { value: [], evidence: E2, confidence: medium, source: "C2", note: "seconds" }
+  composition:         { value: "", evidence: E2, confidence: medium, source: "C3", note: "" }
+  camera_height:       { value: "", evidence: E2, confidence: medium, source: "C4", note: "" }
+  lighting_key:        { value: "", evidence: E2, confidence: medium, source: "C5", note: "" }
+  color_temp:          { value: "", evidence: E2, confidence: medium, source: "C5", note: "" }
+  yavg:                { value: 0, evidence: E1, confidence: high, source: "C6 / signalstats", note: "" }
+  satavg:              { value: 0, evidence: E1, confidence: medium, source: "C6", note: "" }
+  motion_level:        { value: "", evidence: E2, confidence: medium, source: "C7", note: "" }
+  aspect:              { value: "", evidence: E1, confidence: high, source: "C8 / ffprobe", note: "" }
+  safe_area:           { value: "", evidence: E2, confidence: medium, source: "C8", note: "rule-of-thumb for the platform UI, TO VERIFY" }
+  on_screen_elements:  { value: "", evidence: E2, confidence: medium, source: "C9", note: "the structure transfers, the specific graphic does not" }
+  narrative_role_ratio:
+    value: { setup: 0, build: 0, turn: 0, payoff: 0 }
+    evidence: E3
+    confidence: low
+    source: "C10"
+    note: "inference"
+  non_transferable:    { value: [], evidence: E2, confidence: high, source: "C additional requirement", note: "content layer, must not be transferred" }
+
+# ---------- D/E/F Extended ----------
+caption:
+  lines:               { value: 0, evidence: E2, confidence: medium, source: "D", note: "" }
+  chars_per_line:      { value: 0, evidence: E2, confidence: medium, source: "D", note: "" }
+  lead_in_frames:      { value: 0, evidence: E2, confidence: medium, source: "D", note: "" }
+  on_screen_text_role: { value: "", evidence: E2, confidence: medium, source: "D", note: "" }
+
+narrative:
+  structure:           { value: [], evidence: E3, confidence: medium, source: "E", note: "inference" }
+  emotional_curve:     { value: [], evidence: E3, confidence: low, source: "E", note: "subjective annotation" }
+
+context:
+  aspect:              { value: "", evidence: E1, confidence: high, source: "F", note: "" }
+  hook:                { value: "", evidence: E2, confidence: medium, source: "F", note: "" }
+  loudness_policy:     { value: "", evidence: E1, confidence: high, source: "F/B7", note: "check the platform spec again" }
+  playback_environment: { value: "", evidence: E3, confidence: medium, source: "F", note: "" }
+
+# ---------- G Mandatory ----------
+constraints:
+  principle: "idea/expression dichotomy: transfer parameters and structure, never expression"
+  protected_items: []              # mandatory, must be non-empty: the reference's dialogue / music / kinetic type / shot staging / styling
+  transferable_scope: []           # mandatory, must be non-empty: rhythm parameters / structural proportions / loudness targets / colour tendency / subtitle parameters
+  forbidden_actions:               # mandatory, must be non-empty
+    - "reusing frames"
+    - "dubbing off the audio track"
+    - "recreating shots frame by frame"
+    - "removing or obscuring watermarks and rights-management information"
+  legal_review_required: false
+  note: "creative-workflow constraint, not legal advice; commercial projects require review by counsel"
+
+# ---------- Derived rules (drive the edit) ----------
+derived_rules: []
+# - id: R-001
+#   when: "segment == opening && duration <= 3s"
+#   apply: "shot_len in [0.8, 1.2] s, cut_count == 3"
+#   priority: high
+#   weight: 0.8
+#   basis: "A1/A2"
+#   status: active          # active | candidate | retired
+
+# ---------- Hypothesis section (excluded from hard constraints) ----------
+hypotheses: []
+# - id: H-001
+#   statement: ""
+#   evidence: E3
+#   confidence: low
+#   test: "compare against 3 more videos in the same category"
+
+# Validation command (requires Python + PyYAML):
+# python -c "import yaml,sys;d=yaml.safe_load(open(sys.argv[1],encoding='utf-8'));assert d['sfp_version']=='sfp-v1';print('OK')" style-fingerprint.yaml

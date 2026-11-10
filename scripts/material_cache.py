@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-material_cache.py - 素材描述缓存工具（零第三方依赖，Python 3.8+）
+material_cache.py - material description cache (zero third-party dependencies, Python 3.8+)
 
-目的：一段视频素材只让视频模型「看」一次；描述落盘后跨主题、跨会话复用。
-命令：fingerprint / lookup / register / use / verify / themes / stats / validate
-详见 references/09-素材记忆/README.md 与 02-缓存复用协议与Token节省.md
+Goal: let the video model "look" at a piece of footage only once; the description is
+written to disk and then reused across themes and across sessions.
+Commands: fingerprint / lookup / register / use / verify / themes / stats / validate
+See references/09-material-memory/README.md and 02-cache-reuse-protocol-and-token-savings.md
 """
 
 import argparse
@@ -27,14 +28,15 @@ except (AttributeError, ValueError):
     pass
 
 def default_root():
-    """缓存根目录：优先环境变量 $MDC_HOME，否则用当前工作目录下的「素材缓存」。
+    """Cache root: $MDC_HOME when set, otherwise "material-cache" under the current working directory.
 
-    刻意不使用脚本自身位置推算：素材描述属于项目数据，不应写进 skill 安装目录。
+    Deliberately not derived from the script's own location: material descriptions are
+    project data and must not be written into the skill installation directory.
     """
     env = os.environ.get("MDC_HOME")
     if env:
         return Path(env).expanduser().resolve()
-    return Path.cwd() / "素材缓存"
+    return Path.cwd() / "material-cache"
 
 
 CHUNK = 64 * 1024
@@ -58,7 +60,7 @@ THEME_FIELDS = ["ts", "theme_id", "theme_title", "clip_ranges",
                 "narrative_role", "rights_scope_check", "note", "outcome"]
 
 
-# ---------- 基础工具 ----------
+# ---------- Basic helpers ----------
 
 def now():
     return datetime.now().replace(microsecond=0).isoformat()
@@ -126,7 +128,7 @@ def write_csv(path, fields, rows):
 
 def append_csv(path, fields, row):
     rows = read_csv(path, fields)
-    if rows and rows[0].get(fields[0]) == fields[0]:  # 兼容旧文件自带表头
+    if rows and rows[0].get(fields[0]) == fields[0]:  # tolerate a legacy file that carries its own header row
         rows = rows[1:]
     rows.append(row)
     write_csv(path, fields, rows)
@@ -139,7 +141,7 @@ def append_log(root, line):
 
 
 class Lock:
-    """极简独占锁，防止两个任务同时写同一缓存目录。"""
+    """Minimal exclusive lock so two jobs cannot write the same cache directory at once."""
 
     def __init__(self, root, timeout=5.0):
         self.path = Path(root) / ".lock"
@@ -155,7 +157,7 @@ class Lock:
                 return self
             except FileExistsError:
                 if time.time() > deadline:
-                    raise TimeoutError("缓存锁超时：%s" % self.path)
+                    raise TimeoutError("cache lock timed out: %s" % self.path)
                 time.sleep(0.02)
 
     def __exit__(self, *exc):
@@ -166,7 +168,7 @@ class Lock:
 
 
 def section(text, name):
-    """取一个顶层 YAML 节（到下一个顶层键为止），零依赖文本切分。"""
+    """Take one top-level YAML section (up to the next top-level key), dependency-free text split."""
     lines = text.splitlines()
     out, inside = [], False
     for line in lines:
@@ -184,7 +186,7 @@ def field_value(text, key):
     return m.group(1).strip().strip('"').strip("'") if m else ""
 
 
-# ---------- 指纹与规格 ----------
+# ---------- Fingerprints and specs ----------
 
 def sha_full(path):
     h = hashlib.sha256()
@@ -239,12 +241,13 @@ def probe(path):
 def fingerprint(video, full=False, do_probe=True):
     p = Path(video)
     if not p.is_file():
-        raise FileNotFoundError("素材不存在：%s" % p)
+        raise FileNotFoundError("material not found: %s" % p)
     size = p.stat().st_size
     quick = sha_sampled(str(p), size)
     fullsha = sha_full(str(p)) if full else ""
-    # MID 恒基于采样哈希：同一文件无论用 sampled 还是 full 校验，身份都不变。
-    # full_sha 只作为附加校验值，不参与身份计算。
+    # MID is always derived from the sampled hash: the same file keeps the same identity
+    # whether it is checked in sampled or full mode.
+    # full_sha is only an extra check value and never takes part in identity computation.
     d = {"mid": "MID-" + quick[:12], "quick_sha": quick, "full_sha": fullsha,
          "hash_mode": "full" if full else "sampled", "size_bytes": size,
          "source_path": str(p.resolve()), "filename": p.name}
@@ -259,7 +262,7 @@ def est_tokens(duration_s, rate):
         return 0
 
 
-# ---------- 校验 ----------
+# ---------- Validation ----------
 
 def validate_card(card_path, video=None, fp=None):
     text = Path(card_path).read_text(encoding="utf-8")
@@ -270,53 +273,61 @@ def validate_card(card_path, video=None, fp=None):
 
     add("V1", field_value(text, "mdc_version") == "mdc-v1" and
         bool(re.match(r"^MID-[0-9a-f]{12}$", field_value(text, "material_id"))),
-        "mdc_version 与 material_id 格式")
+        "mdc_version and material_id format")
     names = ["content", "where", "style", "usability", "meta"]
     missing = [n for n in names if not section(text, n).strip()]
-    add("V2", not missing, "四组必填节齐全" + ("（缺 %s）" % ",".join(missing) if missing else ""))
+    add("V2", not missing, "all four required sections present"
+        + (" (missing %s)" % ",".join(missing) if missing else ""))
 
     hash_in_card = field_value(text, "content_hash").replace("sha256:", "")
     if fp is not None or video:
         f = fp or fingerprint(video)
         match = bool(hash_in_card) and (hash_in_card == f["quick_sha"] or
                                        hash_in_card == f["full_sha"])
-        add("V3", match, "content_hash 与实际文件一致（实测 %s…）" % f["quick_sha"][:12])
+        add("V3", match, "content_hash matches the actual file (measured %s...)" % f["quick_sha"][:12])
     else:
-        add("V3", bool(hash_in_card), "content_hash 非空（未传 --video，跳过实测比对）", warn=True)
+        add("V3", bool(hash_in_card),
+            "content_hash is non-empty (no --video given, on-disk comparison skipped)", warn=True)
 
     c = section(text, "content")
     summary = field_value(c, "summary")
     anchors = len(re.findall(r"\btc\s*:", c))
     add("V4", bool(summary) and len(summary) <= 80 and anchors >= 3,
-        "summary ≤80 字且 timeline ≥3 个锚点（当前 %d 字 / %d 锚点）" % (len(summary), anchors))
+        "summary <=80 chars and timeline has >=3 anchors (currently %d chars / %d anchors)" % (len(summary), anchors))
 
     w = section(text, "where")
     place = field_value(w, "place_name")
     basis = field_value(w, "place_basis")
-    place_ok = place.lower() in ("", "null", "~", "none") or (basis and basis not in ("无", '""', "''"))
-    add("V5", place_ok, "有地名则必须有依据（place_name=%s, place_basis=%s）" % (place or "null", basis or "空"))
+    place_ok = place.lower() in ("", "null", "~", "none") or (
+        basis and basis.lower() not in ("无", "none", "n/a", '""', "''"))
+    add("V5", place_ok, "a place name requires a basis (place_name=%s, place_basis=%s)"
+        % (place or "null", basis or "empty"))
 
     s = section(text, "style")
     notes = section(s, "style_notes") if "style_notes" in s else ""
-    # style_notes 是 style 内的二级节，section() 只切顶层，这里单独切
+    # style_notes is a second-level section inside style and section() only splits top-level keys,
+    # so it is cut out separately here
     m = re.search(r"^\s*style_notes\s*:.*?$([\s\S]*?)(?=^\s{0,2}[A-Za-z_\u4e00-\u9fa5][\w\u4e00-\u9fa5]*\s*:|^\S|\Z)",
                   s, re.M)
     notes = (m.group(1) if m else "")
-    n_obs = len(re.findall(r"观察\s*:", notes))
-    keys_ok = all(len(re.findall(r"%s\s*:" % k, notes)) >= n_obs for k in
-                  ["依据", "推断", "动作项", "置信度"])
+    # Five-part entries: canonical English keys, legacy Chinese keys still accepted.
+    n_obs = len(re.findall(r"(?:observation|观察)\s*:", notes))
+    keys_ok = all(len(re.findall(r"(?:%s|%s)\s*:" % (en, zh), notes)) >= n_obs
+                  for en, zh in [("basis", "依据"), ("inference", "推断"),
+                                 ("action", "动作项"), ("confidence", "置信度")])
     add("V6", n_obs >= 1 and keys_ok,
-        "style_notes 每条五段式齐全（%d 条观察）" % n_obs)
+        "style_notes has all five parts in every entry (%d observation(s))" % n_obs)
 
     u = section(text, "usability")
     rights = field_value(u, "rights_status") or "unknown"
     nou = field_value(text, "no_use_until_cleared")
     add("V7", rights == "cleared" or nou == "true",
-        "授权未清时 no_use_until_cleared=true（rights=%s）" % rights)
+        "no_use_until_cleared=true while rights are not cleared (rights=%s)" % rights)
 
     body = "\n".join(section(text, n) for n in names[:4])
-    theme_words = re.findall(r"主题|项目代号|T-20\d\d", body)
-    add("V8", not theme_words, "四组字段主题中立（命中 %d 处，需人工确认）" % len(theme_words), warn=True)
+    theme_words = re.findall(r"theme|topic|project code|T-20\d\d", body, re.I)
+    add("V8", not theme_words, "the four sections stay topic-neutral (%d hit(s), needs human confirmation)"
+        % len(theme_words), warn=True)
 
     return results
 
@@ -325,13 +336,13 @@ def print_validation(results):
     for code, status, msg in results:
         print("  [%s] %s %s" % (status, code, msg))
     fails = [r for r in results if r[1] == "FAIL"]
-    print("  结果：%s（%d 项失败 / %d 项警告）" %
-          ("通过" if not fails else "未通过", len(fails),
+    print("  Result: %s (%d failed / %d warning(s))" %
+          ("PASSED" if not fails else "FAILED", len(fails),
            len([r for r in results if r[1] == "WARN"])))
     return not fails
 
 
-# ---------- 命令 ----------
+# ---------- Commands ----------
 
 def cmd_fingerprint(a):
     fp = fingerprint(a.video, full=a.full, do_probe=not a.no_probe)
@@ -360,8 +371,8 @@ def card_digest(root, mid):
     place = field_value(section(text, "where"), "place_name")
     genre = field_value(section(text, "style"), "genre")
     aff = field_value(section(text, "content"), "affordances")
-    return "摘要：%s | 地点：%s | 体裁：%s | 用途标签：%s" % (
-        summary or "（空）", place or "null", genre or "（空）", aff or "（空）")
+    return "Summary: %s | Place: %s | Genre: %s | Use tags: %s" % (
+        summary or "(empty)", place or "null", genre or "(empty)", aff or "(empty)")
 
 
 def log_usage(root, event, fp, cfg, theme="-", model="", note="", actual="", est=None):
@@ -382,7 +393,7 @@ def cmd_lookup(a):
     fp = fingerprint(a.video, full=a.full, do_probe=not a.no_probe)
     if not cfg.get("cache_enabled", True):
         state = "MISS"
-        reason = "kill switch cache_enabled=false，强制未命中"
+        reason = "kill switch cache_enabled=false, forced miss"
         log_usage(root, state, fp, cfg, note=reason)
     else:
         _, exact, same_path = find_index(root, fp)
@@ -390,14 +401,15 @@ def cmd_lookup(a):
             status = exact.get("status", "active")
             rights = exact.get("rights_status", "unknown")
             if status != "active":
-                state, reason = "UNVERIFIED", "卡片状态 %s，需补齐或复核" % status
+                state, reason = "UNVERIFIED", "card status %s, must be completed or re-reviewed" % status
             elif rights not in ("cleared",):
-                state, reason = "HIT_BLOCKED", "授权状态 %s，可读描述但禁止进入时间线" % rights
+                state, reason = "HIT_BLOCKED", "rights status %s, description readable but blocked from the timeline" % rights
             else:
-                state, reason = "HIT", "内容哈希一致，卡片有效、授权已清"
+                state, reason = "HIT", "content hash matches, card valid and rights cleared"
         elif same_path:
-            state, reason = "STALE", "同一路径的素材字节已变化（旧 MID %s）" % same_path[0]["mid"]
-            # 旧卡转 superseded 并留痕；卡片本体与历史版本一律保留
+            state, reason = "STALE", "bytes at the same path changed (old MID %s)" % same_path[0]["mid"]
+            # Old card becomes superseded and the change is recorded; the card itself and all
+            # historical versions are always kept
             with Lock(root):
                 rows2, _, _ = find_index(root, fp)
                 for r in rows2:
@@ -405,10 +417,10 @@ def cmd_lookup(a):
                         r["status"] = "superseded"
                         r["updated"] = now()
                 write_csv(root / "index.csv", INDEX_FIELDS, rows2)
-                append_log(root, "STALE | %s | 旧卡标记 superseded | 新 MID %s" %
+                append_log(root, "STALE | %s | old card marked superseded | new MID %s" %
                            (same_path[0]["mid"], fp["mid"]))
         else:
-            state, reason = "MISS", "无登记记录"
+            state, reason = "MISS", "no registry entry"
         log_usage(root, state, fp, cfg, note=reason)
 
     out = {"state": state, "reason": reason, "mid": fp["mid"],
@@ -422,24 +434,24 @@ def cmd_lookup(a):
     if a.json:
         print(json.dumps(out, ensure_ascii=False, indent=2))
     else:
-        print("=== 素材缓存查询 ===")
-        print("  文件    : %s" % fp["filename"])
-        print("  状态    : %s" % state)
-        print("  原因    : %s" % reason)
+        print("=== Material cache lookup ===")
+        print("  File    : %s" % fp["filename"])
+        print("  State   : %s" % state)
+        print("  Reason  : %s" % reason)
         print("  MID     : %s  (%s, %.3f s)" % (fp["mid"], fp["hash_mode"], fp.get("duration_s", 0)))
         if "digest" in out:
-            print("  卡片    : %s" % out["card"])
+            print("  Card    : %s" % out["card"])
             print("  %s" % out["digest"])
         if state == "HIT":
-            print("  ★ 禁止再次调用视频模型：直接读上述卡片，只做主题适配。"
-                  "本次估算节省 %d 视频输入 token。" % out["est_tokens_saved"])
+            print("  ★ Do NOT call the video model again: read the card above and only adapt it "
+                  "to the theme. This run saves an estimated %d video input tokens." % out["est_tokens_saved"])
         elif state == "HIT_BLOCKED":
-            print("  ★ 可读描述用于讨论，但禁止进入时间线；先补授权。")
+            print("  ★ The description may be read for discussion but must not enter the timeline; clear the rights first.")
         elif state == "STALE":
-            print("  ★ 旧卡转 superseded；重新本地探测 + 一次全量模型请求 + 新卡。")
+            print("  ★ The old card becomes superseded; re-probe locally + one full model request + a new card.")
         elif state == "MISS":
-            print("  ★ 允许发起【一次】全量模型请求：先本地 E1 探测，再用")
-            print("    references/09-素材记忆/模板/模型分析提示词.md 一次问全，填卡 → validate → register。")
+            print("  ★ You may make ONE full model request: probe locally with E1 first, then")
+            print("    references/09-material-memory/templates/model-analysis-prompt.md asks everything at once; fill the card → validate → register.")
     return 0
 
 
@@ -449,13 +461,13 @@ def cmd_register(a):
     cfg = read_config(root)
     fp = fingerprint(a.video, full=a.full, do_probe=not a.no_probe)
     results = validate_card(a.card, fp=fp)
-    print("=== 卡片校验 ===")
+    print("=== Card validation ===")
     if not print_validation(results):
-        print("  校验未通过：请修正后重试。")
+        print("  Validation failed: fix the card and retry.")
         if not a.force:
-            print("  登记中止（如需演练可显式 --force，正式流程禁止使用）。")
+            print("  Registration aborted (use --force only for a dry run; never in the real flow).")
             return 2
-        print("  --force 已启用：仅用于演练/状态机测试，正式流程禁止使用。")
+        print("  --force enabled: dry-run / state-machine testing only, never in the real flow.")
     with Lock(root):
         target = root / "cards" / (fp["mid"] + ".yaml")
         if target.is_file():
@@ -476,16 +488,17 @@ def cmd_register(a):
                      "aliases": fp["filename"], "source_path": fp["source_path"],
                      "created": now(), "updated": now()})
         write_csv(root / "index.csv", INDEX_FIELDS, rows)
-        # 若调用方跳过了 lookup，补记一次 MISS，保证命中率分母 = 新分析次数
+        # If the caller skipped lookup, record one MISS so the hit-rate denominator equals
+        # the number of new analyses
         have_miss = any(r.get("event") == "MISS" and r.get("mid") == fp["mid"]
                         for r in read_csv(root / "usage.csv", USAGE_FIELDS))
         if not have_miss:
-            log_usage(root, "MISS", fp, cfg, note="登记前未查询缓存，补记一次未命中")
+            log_usage(root, "MISS", fp, cfg, note="cache not looked up before registration, MISS recorded")
         log_usage(root, "REGISTER", fp, cfg, model=a.model or "",
-                  actual=a.tokens or "", note="首次全量分析并登记", est=0)
+                  actual=a.tokens or "", note="first full analysis, registered", est=0)
         append_log(root, "REGISTER | %s | %s | card=%s | model=%s" %
                    (fp["mid"], fp["filename"], target.name, a.model or "-"))
-    print("  已登记：%s → %s" % (fp["mid"], target))
+    print("  Registered: %s → %s" % (fp["mid"], target))
     return 0
 
 
@@ -496,10 +509,10 @@ def cmd_use(a):
     fp = fingerprint(a.video, full=a.full, do_probe=not a.no_probe)
     _, exact, _ = find_index(root, fp)
     if not exact:
-        print("  ERROR：素材尚未登记，请先 register。当前 lookup 为 MISS。")
+        print("  ERROR: material is not registered yet, run register first. The current lookup is MISS.")
         return 2
     if exact.get("rights_status") != "cleared" and cfg.get("block_unknown_rights", True):
-        print("  ERROR：授权状态 %s，不得采用。请先补授权并人工改卡。" %
+        print("  ERROR: rights status %s, must not be used. Clear the rights and edit the card manually first." %
               exact.get("rights_status"))
         return 2
     with Lock(root):
@@ -510,19 +523,19 @@ def cmd_use(a):
         if dup:
             dup["ts"] = now()
             dup["note"] = a.note or dup.get("note", "")
-            action = "更新已有适配记录"
+            action = "updated existing fit record"
         else:
             rows.append({"ts": now(), "theme_id": a.theme, "theme_title": a.theme,
                          "clip_ranges": a.clip or "", "narrative_role": a.role or "",
                          "rights_scope_check": "in_scope", "note": a.note or "",
                          "outcome": ""})
-            action = "新增适配记录"
+            action = "added new fit record"
         write_csv(p, THEME_FIELDS, rows)
-        log_usage(root, "USE", fp, cfg, theme=a.theme, note="%s；直接读卡，未请求模型" % action)
+        log_usage(root, "USE", fp, cfg, theme=a.theme, note="%s; card read directly, no model request" % action)
         append_log(root, "USE | %s | %s | clip=%s | %s" %
                    (fp["mid"], a.theme, a.clip or "-", a.note or "-"))
-    print("  %s：%s × %s（%s）" % (action, fp["mid"], a.theme, a.clip or "全段"))
-    print("  ★ 本次复用 0 次视频模型请求，直接读取 cards/%s.yaml" % fp["mid"])
+    print("  %s: %s x %s (%s)" % (action, fp["mid"], a.theme, a.clip or "full clip"))
+    print("  ★ This reuse made 0 video model requests; read cards/%s.yaml directly" % fp["mid"])
     return 0
 
 
@@ -537,15 +550,16 @@ def cmd_verify(a):
         ok = card.is_file() and field_value(card.read_text(encoding="utf-8"),
                                             "content_hash").replace("sha256:", "") in (
             fp["quick_sha"], fp["full_sha"] or "_")
-        verdict = "OK" if ok else "不一致"
-        print("  [%s] %s：哈希 %s，卡片 %s" %
-              (verdict, fp["mid"], "一致" if ok else "不一致", "存在" if card.is_file() else "缺失"))
-        print("       hash_mode=%s（%s）" %
-              (fp["hash_mode"], "全文件，无采样盲区" if a.full else "采样模式，未采样区改动可能漏检；交付级建议 --full"))
+        verdict = "OK" if ok else "MISMATCH"
+        print("  [%s] %s: hash %s, card %s" %
+              (verdict, fp["mid"], "matches" if ok else "differs", "present" if card.is_file() else "missing"))
+        print("       hash_mode=%s (%s)" %
+              (fp["hash_mode"], "whole file, no sampling blind spot" if a.full
+               else "sampled mode, changes in unsampled regions may be missed; --full recommended for delivery"))
     elif same_path:
-        print("  [STALE] 同路径素材字节已变化：旧 MID %s，需重新分析。" % same_path[0]["mid"])
+        print("  [STALE] bytes at the same path changed: old MID %s, re-analysis required." % same_path[0]["mid"])
     else:
-        print("  [MISS] 无登记记录。")
+        print("  [MISS] no registry entry.")
     log_usage(root, "VERIFY", fp, cfg, note="verify")
     append_log(root, "VERIFY | %s | %s" % (fp["mid"], a.video))
     return 0
@@ -556,11 +570,11 @@ def cmd_themes(a):
     fp = fingerprint(a.video, do_probe=False)
     rows = [r for r in read_csv(root / "themes" / (fp["mid"] + ".csv"), THEME_FIELDS)
             if r.get("theme_id", "").startswith("T-")]
-    print("=== %s 的主题适配记录（%d 条）===" % (fp["mid"], len(rows)))
+    print("=== Fit records for %s (%d) ===" % (fp["mid"], len(rows)))
     for r in rows:
         print("  %s | %s | %s | %s | %s" %
               (r["ts"], r["theme_id"], r.get("clip_ranges", ""),
-               r.get("narrative_role", ""), r.get("outcome", "") or "待回填"))
+               r.get("narrative_role", ""), r.get("outcome", "") or "pending"))
     return 0
 
 
@@ -589,16 +603,16 @@ def cmd_stats(a):
     if a.json:
         print(json.dumps(out, ensure_ascii=False, indent=2))
     else:
-        print("=== 缓存统计（数值均为估算，非账单）===")
-        for k, label in [("materials", "已登记素材"), ("themes", "涉及主题"),
-                         ("hits", "HIT 次数"), ("misses", "MISS 次数"),
-                         ("uses", "主题复用次数"), ("hit_rate_pct", "命中率 (%)"),
-                         ("est_saved_input_tokens", "估算节省视频输入 token"),
-                         ("actual_tokens_logged", "已登记实测 token"),
-                         ("blocked_materials", "授权未清素材")]:
+        print("=== Cache stats (all figures are estimates, not a bill) ===")
+        for k, label in [("materials", "registered materials"), ("themes", "themes touched"),
+                         ("hits", "HIT count"), ("misses", "MISS count"),
+                         ("uses", "theme reuses"), ("hit_rate_pct", "hit rate (%)"),
+                         ("est_saved_input_tokens", "est. input tokens saved"),
+                         ("actual_tokens_logged", "measured tokens logged"),
+                         ("blocked_materials", "rights uncleared materials")]:
             print("  %-26s %s" % (label, out[k]))
-        print("  估算速率：%d token/秒；真实用量以 usage_metadata 为准。" % out["token_rate"])
-        print("  节省比例（按复用次数 N）：1 − 1/N，只计视频输入 token。")
+        print("  Estimated rate: %d token/s; real usage comes from usage_metadata." % out["token_rate"])
+        print("  Saving ratio (for N reuses): 1 - 1/N, video input tokens only.")
     return 0
 
 
@@ -608,58 +622,58 @@ def cmd_validate(a):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="素材描述缓存工具（零依赖）")
+    ap = argparse.ArgumentParser(description="Material description cache tool (zero dependencies)")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     def common(p, video=True):
         if video:
-            p.add_argument("video", help="素材文件路径")
-        p.add_argument("--root", help="缓存根目录（默认 $MDC_HOME，未设则为 ./素材缓存）")
-        p.add_argument("--full", action="store_true", help="用全文件 SHA-256（默认 6 MiB 采样）")
-        p.add_argument("--no-probe", action="store_true", help="跳过 ffprobe（仅测试用）")
+            p.add_argument("video", help="path to the material file")
+        p.add_argument("--root", help="cache root (default $MDC_HOME, otherwise ./material-cache)")
+        p.add_argument("--full", action="store_true", help="use a full-file SHA-256 (6 MiB sampling by default)")
+        p.add_argument("--no-probe", action="store_true", help="skip ffprobe (testing only)")
 
-    p = sub.add_parser("fingerprint", help="内容哈希与 ffprobe 规格")
+    p = sub.add_parser("fingerprint", help="content hash and ffprobe specs")
     common(p)
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_fingerprint)
 
-    p = sub.add_parser("lookup", help="★ 分析任何素材前的第一步")
+    p = sub.add_parser("lookup", help="★ first step before analysing any material")
     common(p)
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_lookup)
 
-    p = sub.add_parser("register", help="登记描述卡（自动校验）")
+    p = sub.add_parser("register", help="register a description card (auto-validated)")
     common(p)
-    p.add_argument("--card", required=True, help="mdc-v1 YAML 卡片")
-    p.add_argument("--model", default="", help="模型名与版本")
-    p.add_argument("--tokens", default="", help="实测 token 数（usage_metadata）")
-    p.add_argument("--force", action="store_true", help="校验失败仍登记（仅演练）")
+    p.add_argument("--card", required=True, help="mdc-v1 YAML card")
+    p.add_argument("--model", default="", help="model name and version")
+    p.add_argument("--tokens", default="", help="measured token count (usage_metadata)")
+    p.add_argument("--force", action="store_true", help="register even if validation fails (dry run only)")
     p.set_defaults(func=cmd_register)
 
-    p = sub.add_parser("use", help="记录一次主题复用（不请求模型）")
+    p = sub.add_parser("use", help="record one theme reuse (no model request)")
     common(p)
-    p.add_argument("--theme", required=True, help="T-YYYY-<短名>")
+    p.add_argument("--theme", required=True, help="T-YYYY-<short name>")
     p.add_argument("--clip", default="", help="MM:SS-MM:SS")
-    p.add_argument("--role", default="", help="叙事角色")
-    p.add_argument("--note", default="", help="备注")
+    p.add_argument("--role", default="", help="narrative role")
+    p.add_argument("--note", default="", help="note")
     p.set_defaults(func=cmd_use)
 
-    p = sub.add_parser("verify", help="重算哈希与卡片比对")
+    p = sub.add_parser("verify", help="recompute the hash and compare it with the card")
     common(p)
     p.set_defaults(func=cmd_verify)
 
-    p = sub.add_parser("themes", help="列出该素材被哪些主题用过")
+    p = sub.add_parser("themes", help="list the themes this material has been used in")
     common(p)
     p.set_defaults(func=cmd_themes)
 
-    p = sub.add_parser("stats", help="命中率与估算节省")
+    p = sub.add_parser("stats", help="hit rate and estimated savings")
     p.add_argument("--root")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_stats)
 
-    p = sub.add_parser("validate", help="校验 mdc-v1 卡片（V1–V8）")
+    p = sub.add_parser("validate", help="validate an mdc-v1 card (V1–V8)")
     p.add_argument("card")
-    p.add_argument("--video", help="同时比对 content_hash 与实际文件")
+    p.add_argument("--video", help="also compare content_hash with the actual file")
     p.set_defaults(func=cmd_validate)
 
     a = ap.parse_args()

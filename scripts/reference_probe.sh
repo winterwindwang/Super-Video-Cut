@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
-# 参考视频客观探测 —— RSI 评估的 S2 阶段
-# 输出：规格、切点表、镜头时长统计、分段切换密度、响度、静音、黑场/冻帧、
-#       亮度/饱和度统计、全片与开场抽帧拼图、汇总 metrics.csv
-# 用法: bash reference_probe.sh <参考视频> [输出目录，默认 ./probe_out]
-# 实测环境: ffmpeg / ffprobe 8.1.2 (Windows, Git Bash)
+# Reference video objective probe - the S2 stage of RSI evaluation
+# Outputs: specs, cut points, shot length stats, cut density per quarter, loudness, silence,
+#          black / frozen frames, brightness / saturation stats, overview and opening contact
+#          sheets, aggregated metrics.csv
+# Usage: bash reference_probe.sh <reference_video> [output_dir, default ./probe_out]
+# Tested on: ffmpeg / ffprobe 8.1.2 (Windows, Git Bash)
 #
-# 注意：本机 Windows 下 metadata=print:file=绝对路径 会因盘符冒号被滤镜解析器误判，
-#       因此一律把元数据打到 stderr 再解析，不落盘中间元数据文件。
+# Note: on Windows the metadata=print:file=<absolute path> form is mis-parsed by the filter
+#       parser because of the drive-letter colon, so metadata is always printed to stderr and
+#       parsed from there; no intermediate metadata file is written.
 #
-# 本脚本只提供 E1 客观证据。A/B/C 三维度的「推断」与「动作项」必须由人工填写评估表。
+# This script only supplies E1 objective evidence. The "inference" and "action" items of the
+# A/B/C dimensions must be filled in by a human in the evaluation sheet.
 
 set -u
 IN="${1:-}"
@@ -32,10 +35,10 @@ avg() { awk '{s+=$1;n++} END{if(n>0) printf "%.3f", s/n; else printf "NA"}' "$1"
 
 log "=== Reference Probe | $(date '+%Y-%m-%d %H:%M:%S') | $IN ==="
 log "tool: $(ffmpeg -version 2>/dev/null | head -1)"
-log "NOTE: E1 evidence only. Fill 评估表.md for inference and action items."
+log "NOTE: E1 evidence only. Fill references/08-rsi/templates/reference-video-evaluation.md for inference and action items."
 log ""
 
-# ---------- 1. 规格 ----------
+# ---------- 1. Specs ----------
 log "--- 1. container / stream spec ---"
 ffprobe -v error -show_entries \
   "stream=index,codec_type,codec_name,width,height,pix_fmt,r_frame_rate,avg_frame_rate,sample_rate,channels:format=format_name,duration,size,bit_rate" \
@@ -50,7 +53,7 @@ metric "fps" "$(ffprobe -v error -select_streams v:0 -show_entries stream=avg_fr
 log "[spec] $OUT/probe.json"
 log ""
 
-# ---------- 2. 切点表 ----------
+# ---------- 2. Cut points ----------
 log "--- 2. cut points (select scene > 0.25 + showinfo) ---"
 ffmpeg -hide_banner -nostdin -i "$IN" \
   -vf "select='gt(scene,0.25)',showinfo" -an -f null - 2>&1 \
@@ -60,10 +63,10 @@ log "[cuts] $CUTN candidate cut points -> $OUT/cuts.txt"
 head -30 "$OUT/cuts.txt" | tee -a "$L"
 if [ "$CUTN" -gt 30 ]; then log "  ... (full list in cuts.txt)"; fi
 metric "cut_count" "$CUTN" "count" "select scene>0.25"
-log "  !! 快速摇镜/闪光可能误报；请与抽帧拼图交叉验证后再用于 A3/A9"
+log "  !! Fast pans / flashes can produce false positives; cross-check against the contact sheets before using them for A3/A9"
 log ""
 
-# ---------- 3. 镜头时长统计 ----------
+# ---------- 3. Shot length distribution ----------
 log "--- 3. shot length distribution ---"
 awk -v dur="$DUR" 'BEGIN{prev=0} {d=$1-prev; if(d>0) print d; prev=$1} END{d=dur-prev; if(d>0) print d}' \
   "$OUT/cuts.txt" > "$OUT/shot_lengths.txt"
@@ -78,14 +81,14 @@ STATS="$(awk '{a[NR]=$1; s+=$1} END{
 }' "$SORTED")"
 set -- $STATS
 log "[shots] n=$SHOTN  mean=$1 s  median=$2 s  p90=$3 s  min=$4 s  max=$5 s"
-log "[shots] 长尾分布下以 median 为节奏代表，不要用 mean（见 02 卷 A1）"
+log "[shots] with a long-tail distribution use median as the pacing figure, not mean (see 02 A1)"
 metric "shot_count" "$SHOTN" "count" "computed"
 metric "shot_mean_s" "$1" "s" "computed"
 metric "shot_median_s" "$2" "s" "computed"
 metric "shot_p90_s" "$3" "s" "computed"
 log ""
 
-# ---------- 4. 分段切换密度 ----------
+# ---------- 4. Cut density by quarter ----------
 log "--- 4. cut density by quarter ---"
 DENSITY="$(awk -v dur="$DUR" 'BEGIN{if(dur<=0)dur=1} {q=int($1/(dur/4))+1; if(q>4)q=4; if(q<1)q=1; c[q]++} END{for(i=1;i<=4;i++) printf "Q%d=%.1f ", i, c[i]/(dur/4)*60}' "$OUT/cuts.txt")"
 log "[density] $DENSITY (cuts/min, 4 equal quarters)"
@@ -93,15 +96,15 @@ DPM="$(awk -v n="$CUTN" -v d="$DUR" 'BEGIN{if(d>0) printf "%.1f", n/d*60; else p
 metric "cut_density_per_min" "$DPM" "cuts/min" "computed"
 log ""
 
-# ---------- 5. 画面异常 ----------
+# ---------- 5. Picture anomalies ----------
 log "--- 5. black / frozen frames ---"
 ffmpeg -hide_banner -nostdin -i "$IN" -an \
   -vf "blackdetect=d=0.5:pix_th=0.10:pic_th=0.98,freezedetect=n=-60dB:d=2" \
   -f null - 2>&1 | grep -E "black_start|black_end|freeze_start|freeze_end" | tee -a "$L" || true
-log "[video] 刻意黑场/静止画面会误报，需人工确认"
+log "[video] intentional black / still passages are also flagged; a human must confirm"
 log ""
 
-# ---------- 6. 音频 ----------
+# ---------- 6. Audio ----------
 HAS_AUDIO="$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "$IN" 2>/dev/null | head -1)"
 if [ -n "$HAS_AUDIO" ]; then
   log "--- 6a. loudness (EBU R128 ref; read Summary) ---"
@@ -118,18 +121,18 @@ if [ -n "$HAS_AUDIO" ]; then
   ffmpeg -hide_banner -nostdin -i "$IN" -vn -af "silencedetect=noise=-40dB:d=0.5" -f null - 2>&1 \
     | grep -E "silence_start|silence_end" | tee -a "$L" > "$OUT/silence.txt"
   cat "$OUT/silence.txt" | tee -a "$L"
-  log "[silence] 必须人工区分「刻意留白」与「缺音」，见 02 卷 B9"
+  log "[silence] a human must separate deliberate silence from missing audio (see 02 B9)"
   log ""
 
   log "--- 6c. voice band level (300-3400 Hz) ---"
   ffmpeg -hide_banner -nostdin -i "$IN" -vn -af "highpass=f=300,lowpass=f=3400,volumedetect" -f null - 2>&1 \
     | grep -E "mean_volume|max_volume" | tee -a "$L" || true
 else
-  log "[audio] NO AUDIO TRACK — B 维度需降级，且不得用参考片音轨顶替"
+  log "[audio] NO AUDIO TRACK — dimension B must be downgraded, and the reference clip's audio must never be substituted with another track"
 fi
 log ""
 
-# ---------- 7. 色彩统计（每秒抽 1 帧） ----------
+# ---------- 7. Color stats (1 sample per second) ----------
 log "--- 7. color stats (1 sample/sec, signalstats) ---"
 for K in YAVG SATAVG; do
   LC="$(printf '%s' "$K" | tr 'A-Z' 'a-z')"
@@ -140,22 +143,22 @@ for K in YAVG SATAVG; do
   log "[$K] mean=$V  (samples=$(wc -l < "$OUT/$LC.txt" | tr -d ' ')) -> $OUT/$LC.txt"
   metric "$LC" "$V" "level" "signalstats fps=1"
 done
-log "[color] 数值为相对倾向，跨片比较需同色彩空间与同曝光条件"
+log "[color] values are relative tendencies; comparing across clips needs the same color space and exposure"
 log ""
 
-# ---------- 8. 抽帧拼图 ----------
+# ---------- 8. Contact sheets ----------
 log "--- 8. contact sheets ---"
 ffmpeg -hide_banner -nostdin -loglevel error -i "$IN" \
   -vf "fps=1/5,scale=320:-1,tile=5x5" -frames:v 1 -update 1 "$OUT/sheet_overview.png" 2>&1 | tee -a "$L"
-[ -f "$OUT/sheet_overview.png" ] && log "[sheet] 全片概览(每 5 s 一格, 25 格): $OUT/sheet_overview.png" || log "[sheet] overview FAILED"
+[ -f "$OUT/sheet_overview.png" ] && log "[sheet] overview (one cell per 5 s, 25 cells): $OUT/sheet_overview.png" || log "[sheet] overview FAILED"
 ffmpeg -hide_banner -nostdin -loglevel error -t 15 -i "$IN" \
   -vf "fps=1,scale=320:-1,tile=5x3" -frames:v 1 -update 1 "$OUT/sheet_opening.png" 2>&1 | tee -a "$L"
-[ -f "$OUT/sheet_opening.png" ] && log "[sheet] 开场 15 s(每 1 s 一格): $OUT/sheet_opening.png" || log "[sheet] opening FAILED"
+[ -f "$OUT/sheet_opening.png" ] && log "[sheet] opening 15 s (one cell per 1 s): $OUT/sheet_opening.png" || log "[sheet] opening FAILED"
 log ""
 
 log "=== PROBE DONE ==="
-log "E1 客观证据已就绪：$M"
-log "人工必做：全片通看 2 遍(画面/声音各一)、关键段逐帧、A/B/C 各 10 项四段式说明、G 过滤器打标。"
-log "然后填写 references/08-RSI自进化/模板/参考视频评估表.md，产出风格指纹，并在 S6 取得用户确认后才可开剪。"
+log "E1 objective evidence ready: $M"
+log "Human must do: watch the whole clip twice (once for picture, once for sound), step through the key sections frame by frame, write the four-part description for each of the 10 items of A/B/C, and tag the G filters."
+log "Then fill references/08-rsi/templates/reference-video-evaluation.md, produce the style fingerprint, and only start editing after user sign-off at S6."
 log "=== log: $L ==="
 rm -f "$SORTED"

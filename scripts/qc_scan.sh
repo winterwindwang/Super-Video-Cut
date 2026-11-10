@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# 成片技术审查辅助脚本 —— 只做 L1 自动检测，不替代人工审片。
-# 用法: bash qc_scan.sh <视频文件> [日志目录，默认 ./qc_logs]
-# 实测环境: ffmpeg / ffprobe 8.1.2 (Windows, Git Bash)
+# Delivery technical QC helper - automated L1 checks only, it does not replace human review.
+# Usage: bash qc_scan.sh <video_file> [log_dir, default ./qc_logs]
+# Tested on: ffmpeg / ffprobe 8.1.2 (Windows, Git Bash)
 set -u
 
 IN="${1:-}"
@@ -80,5 +80,5 @@ log ""
 log "=== AUTO CHECK DONE ==="
 log "Still REQUIRED by a human: A/V sync, subtitle proofreading & timing,"
 log "content compliance & rights clearance, first/last frame, full-length viewing."
-log "See references/06-成片审查/02-内容与合规审查.md and 03-审查表模板.md."
+log "See references/06-delivery-qc/02-content-and-compliance-review.md and 03-qc-report-templates.md."
 log "=== full log: $L ==="

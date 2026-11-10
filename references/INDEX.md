@@ -1,114 +1,114 @@
-# references 索引
+# references index
 
-> 分类：导航 | 主题：按阶段/任务的最短路径与最小必读集 | 整理日期：2026-11-10 | 适用：进入 references 前先看本文件
+> Category: Navigation | Topic: the shortest path and minimum required reading for each stage or task | Compiled: 2026-11-10 | Applies to: read this file first, before entering references
 
-## 怎么用这三层
+## How to use the three layers
 
-1. **SKILL.md** 决定流程与红线，先读它。
-2. **本文件** 决定此刻读哪几份，避免一次性灌入 50 份文档。
-3. **具体文档** 只在需要参数、命令、模板时打开。
+1. **SKILL.md** decides the process and the red lines; read it first.
+2. **This file** decides which documents to read right now, so that 50 documents are not dumped in at once.
+3. **A specific document** is opened only when you need a parameter, a command or a template.
 
-每份文档结构统一，可跳读：
+Every document follows the same structure, so it can be read selectively:
 
 ```
-# 标题 → 元信息块 → 核心原理/概念对比 → 可执行规范与参数表
-→ 操作步骤/工作流(含可运行命令) → 常见错误与排查 → 速查清单 → 参考来源
+# title → metadata block → core principles / concept comparison → executable spec and parameter tables
+→ procedure / workflow (with runnable commands) → common mistakes and troubleshooting → quick-reference checklist → references
 ```
 
-要找某个数值，用检索比通读快：
+To find a specific value, searching beats reading end to end:
 
 ```bash
-grep -n "LUFS"      "02-配音与音频/02-音频后期与混音规范.md"
-grep -n "CPS\|阅读速度" "03-字幕系统/01-字幕规范与排版.md"
-grep -n "安全区"    "04-分类型剪辑/01-短视频与Vlog.md"
-grep -n "第二十四条" "05-版权法规/01-中国著作权法与视听作品.md"
+grep -n "LUFS"      "02-audio-and-voice/02-audio-post-and-mixing.md"
+grep -n "CPS\|reading speed" "03-subtitles/01-subtitle-style-and-layout.md"
+grep -n "safe area"    "04-genre-playbooks/01-short-form-and-vlog.md"
+grep -n "Article 24" "05-copyright/01-china-copyright-law-and-audiovisual-works.md"
 ```
 
-## 十卷速览
+## The ten volumes at a glance
 
-| 卷 | 份数 | 解决什么 | 何时打开 |
+| Volume | Files | What it solves | When to open it |
 | --- | --- | --- | --- |
-| `00-总览` | 3 | 能力域映射、证据分级、文件清单 | 需要确认某结论可信度时 |
-| `01-剪辑技巧` | 4 | 镜头语言、转场节奏、工程规范、调色 | M3 排方案、M4 剪辑与调色 |
-| `02-配音与音频` | 4 | 录制发声、混音响度、音乐音效、AI 配音 | 有口播/配音/混音需求 |
-| `03-字幕系统` | 4 | 排版、格式标准、工具流、多语言无障碍 | 做字幕或交付字幕文件 |
-| `04-分类型剪辑` | 6 | 六类视频的结构模板与平台规格 | 明确类型后取时间轴模板 |
-| `05-版权法规` | 5 | 著作权、二创边界、音乐授权、人格权、平台规则 | 商用、二创、素材来源存疑 |
-| `06-成片审查` | 3 | 技术清单、内容合规、审查表模板 | M5 交付前 |
-| `07-工具与资源` | 2 | 软件生态、素材与字体授权 | 选工具、找可商用素材 |
-| `08-RSI自进化` | 6 | 参考片三维评估、指纹、映射、自进化、治理 | M2、M6 |
-| `09-素材记忆` | 4 | 素材描述卡、缓存协议、多主题治理、协同 | M1，以及任何复用素材的场合 |
+| `00-overview` | 3 | capability-domain mapping, evidence grading, file inventory | when you need to confirm how reliable a conclusion is |
+| `01-editing-craft` | 4 | shot language, transition rhythm, project standards, colour grading | M3 while planning the edit, M4 while editing and grading |
+| `02-audio-and-voice` | 4 | recording and voice production, mixing and loudness, music and SFX, AI voice | when there is voiceover / dubbing / mixing work |
+| `03-subtitles` | 4 | layout, format standards, tooling workflow, multilingual accessibility | when making subtitles or delivering subtitle files |
+| `04-genre-playbooks` | 6 | structure templates and platform specs for six video types | once the type is settled, to take the timeline template |
+| `05-copyright` | 5 | copyright, derivative-work boundaries, music licensing, personality rights, platform rules | commercial use, derivative works, material of uncertain provenance |
+| `06-delivery-qc` | 3 | technical checklist, content compliance, review-form templates | M5, before delivery |
+| `07-tools-and-resources` | 2 | software ecosystem, stock-asset and font licensing | choosing tools, finding commercially usable assets |
+| `08-rsi` | 6 | three-dimension reference evaluation, fingerprints, mapping, self-improvement, governance | M2, M6 |
+| `09-material-memory` | 4 | material description cards, cache protocol, multi-topic governance, coordination | M1, and any occasion where material is reused |
 
-## 按阶段的最小必读集
+## Minimum required reading by stage
 
-**M1 素材入库**（先做，避免重复花 token）
+**M1 Material intake** (do this first, so tokens are not spent twice)
 
-- `09-素材记忆/02-缓存复用协议与Token节省.md` — 五种状态的行动表
-- `09-素材记忆/01-素材描述卡规范.md` — 字段定义与 V1–V8 校验
-- `09-素材记忆/模板/模型分析提示词.md` — 未命中时的一次性分析提示词
+- `09-material-memory/02-cache-reuse-protocol-and-token-savings.md` — the action table for the five states
+- `09-material-memory/01-material-description-card-spec.md` — field definitions and V1–V8 validation
+- `09-material-memory/templates/model-analysis-prompt.md` — the one-off analysis prompt used on a cache miss
 
-**M2 参考风格评估**
+**M2 Reference-style evaluation**
 
-- `08-RSI自进化/02-参考视频多维评估框架.md` — A–G 维度与五段式说明
-- `08-RSI自进化/03-风格指纹规范.md` — 指纹字段与证据等级
-- `08-RSI自进化/模板/参考视频评估表.md` — 直接填写
-- 需要客观数值时跑 `scripts/reference_probe.sh`
+- `08-rsi/02-reference-video-evaluation-framework.md` — dimensions A–G and the five-part explanation
+- `08-rsi/03-style-fingerprint-spec.md` — fingerprint fields and evidence grades
+- `08-rsi/templates/reference-video-evaluation.md` — fill it in directly
+- run `scripts/reference_probe.sh` when objective numbers are needed
 
-**M3 剪辑方案**
+**M3 Edit plan**
 
-- `08-RSI自进化/04-从指纹到剪辑方案的映射.md` — 参数迁移与冲突消解
-- `04-分类型剪辑/0X-*.md` — 该类型的结构时间轴模板
-- 补节奏与转场细节时才读 `01-剪辑技巧/02`
+- `08-rsi/04-fingerprint-to-edit-plan-mapping.md` — parameter transfer and conflict resolution
+- `04-genre-playbooks/0X-*.md` — the structural timeline template for that type
+- read `01-editing-craft/02` only to fill in rhythm and transition detail
 
-**M4 制作**
+**M4 Production**
 
-按 SKILL.md 的"在做 / 读"表取单卷。同一时刻只读一卷，避免上下文被无关参数占满。
+Take a single volume from the "doing / reading" table in SKILL.md. Read one volume at a time, so the context is not filled up with irrelevant parameters.
 
-**M5 成片审查**
+**M5 Finished-cut review**
 
-- `06-成片审查/01-技术规格审查清单.md` — 技术项与自动检测
-- `06-成片审查/02-内容与合规审查.md` — 人工判断项
-- `06-成片审查/03-审查表模板.md` — 表 A–G 存档
-- 先跑 `scripts/qc_scan.sh`，再逐项过表
+- `06-delivery-qc/01-technical-spec-checklist.md` — technical items and automated checks
+- `06-delivery-qc/02-content-and-compliance-review.md` — items that require human judgement
+- `06-delivery-qc/03-qc-report-templates.md` — archiving forms A–G
+- run `scripts/qc_scan.sh` first, then work through the form item by item
 
-**M6 反馈回流**
+**M6 Feedback loop**
 
-- `08-RSI自进化/05-反馈回流与自进化算法.md` — 误差归因与九步闸门
-- `08-RSI自进化/06-案例库与版本治理.md` — 归档、版本、回滚
-- `08-RSI自进化/模板/自进化记录模板.md` — 留痕
+- `08-rsi/05-feedback-loop-and-self-improvement.md` — error attribution and the nine-step gate
+- `08-rsi/06-case-library-and-version-governance.md` — archiving, versions, rollback
+- `08-rsi/templates/self-improvement-record.md` — leaving a record
 
-## 高频交叉问题
+## Frequently cross-cutting questions
 
-| 问题 | 读 |
+| Question | Read |
 | --- | --- |
-| 二创到什么程度算侵权 | `05-版权法规/02-二创剪辑与合理使用边界.md` 决策树 |
-| 这条音乐能不能用 | `05-版权法规/03-音乐音效与录音制品授权.md` 三层权利 |
-| 字体会不会有版权问题 | `05-版权法规/04-肖像字体素材与人格权.md` |
-| 抖音/B站/视频号规格 | `04-分类型剪辑/01-短视频与Vlog.md` + `07-工具与资源` |
-| 响度到底调多少 | `02-配音与音频/02-音频后期与混音规范.md` 目标表 |
-| 字幕多长停多久 | `03-字幕系统/01-字幕规范与排版.md` |
-| 用哪个剪辑软件 | `07-工具与资源/01-剪辑软件与插件生态.md` |
-| 免费可商用素材 | `07-工具与资源/02-素材与学习资源.md`（授权须自行复核） |
+| How far can a derivative edit go before it counts as infringement | the decision tree in `05-copyright/02-derivative-edits-and-fair-use.md` |
+| Can I use this piece of music | the three layers of rights in `05-copyright/03-music-sfx-and-recording-licensing.md` |
+| Will a font create a copyright problem | `05-copyright/04-likeness-fonts-stock-and-personality-rights.md` |
+| Specs for Douyin (抖音) / Bilibili (B站) / WeChat Channels (视频号) | `04-genre-playbooks/01-short-form-and-vlog.md` + `07-tools-and-resources` |
+| What loudness should I actually target | the target table in `02-audio-and-voice/02-audio-post-and-mixing.md` |
+| How long should a subtitle be, and how long should it stay | `03-subtitles/01-subtitle-style-and-layout.md` |
+| Which editing application should I use | `07-tools-and-resources/01-nle-software-and-plugins.md` |
+| Free assets that are commercially usable | `07-tools-and-resources/02-stock-assets-and-learning-resources.md` (verify the licence yourself) |
 
-## 命名约定
+## Naming conventions
 
-- 卷目录：`NN-中文名`，编号即推荐阅读顺序
-- 文档：`NN-主题.md`，同卷内按流程先后排列
-- 模板：各卷 `模板/` 子目录，可直接复制填写
-- 脚本：统一在 skill 根的 `scripts/`，文档中以 `scripts/xxx` 指代（相对 skill 根）
+- Volume directories: `NN-<name>`; the number is the recommended reading order
+- Documents: `NN-<topic>.md`, ordered by process sequence within a volume
+- Templates: the `templates/` subdirectory of each volume, ready to copy and fill in
+- Scripts: all under `scripts/` at the skill root; documents refer to them as `scripts/xxx` (relative to the skill root)
 
-## 证据等级速记
+## Evidence grades at a glance
 
-各文档中的标注沿用 `00-总览/资料来源与可信度.md`：
+The labels used throughout the documents follow `00-overview/sources-and-reliability.md`:
 
-| 等级 | 含义 | 例 |
+| Grade | Meaning | Example |
 | --- | --- | --- |
-| A | 标准/法规原文、官方规范 | ITU-R BS.1770、著作权法条文 |
-| B | 厂商官方文档、平台官方规则 | ffmpeg 文档、平台创作者规范 |
-| C | 学术论文、行业白皮书 | 剪辑节奏实证研究 |
-| D | 媒体转述、社区经验 | 工具评测、教程 |
-| E0–E4 | 素材/评估证据强度（见 `08/02`） | E1 可复现测量，E4 主观判断 |
+| A | the text of a standard or regulation, an official specification | ITU-R BS.1770, the provisions of the Copyright Law |
+| B | official vendor documentation, official platform rules | the ffmpeg documentation, platform creator guidelines |
+| C | academic papers, industry white papers | empirical research on editing rhythm |
+| D | media reporting, community experience | tool reviews, tutorials |
+| E0–E4 | material / evaluation evidence strength (see `08/02`) | E1 reproducible measurement, E4 subjective judgement |
 
-**引用任何数值前先看等级**：B 级以下且标注「待核实」的，不得当作确定事实向用户陈述。
+**Check the grade before citing any number**: anything below grade B, or marked TO VERIFY, must not be presented to the user as established fact.
 
-检索日期：2026-11-10 | 关联：`../SKILL.md`、`00-总览/知识地图.md`
+Retrieved: 2026-11-10 | Related: `../SKILL.md`, `00-overview/knowledge-map.md`

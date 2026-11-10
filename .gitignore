@@ -1,5 +1,5 @@
 __pycache__/
 *.py[cod]
-素材缓存/
+material-cache/
 .DS_Store
 Thumbs.db

@@ -72,16 +72,16 @@ super-video-cut/
 ├── SKILL.md              # workflow, red lines, routing (loaded on trigger)
 ├── references/           # 10 volumes, loaded only as needed
 │   ├── INDEX.md          # shortest path per stage
-│   ├── 00-总览/           # capability map, evidence grading, manifest
-│   ├── 01-剪辑技巧/       # cutting craft, pacing, engineering, grading
-│   ├── 02-配音与音频/     # recording, mixing, loudness, music, TTS
-│   ├── 03-字幕系统/       # typography, formats, tooling, accessibility
-│   ├── 04-分类型剪辑/     # six genres with timeline templates
-│   ├── 05-版权法规/       # copyright, fair use, licensing, platforms
-│   ├── 06-成片审查/       # technical QC, content compliance, checklists
-│   ├── 07-工具与资源/     # software, assets, licensing caveats
-│   ├── 08-RSI自进化/      # reference evaluation, fingerprints, feedback loop
-│   └── 09-素材记忆/       # clip description cards and cache protocol
+│   ├── 00-overview/           # capability map, evidence grading, manifest
+│   ├── 01-editing-craft/       # cutting craft, pacing, engineering, grading
+│   ├── 02-audio-and-voice/     # recording, mixing, loudness, music, TTS
+│   ├── 03-subtitles/       # typography, formats, tooling, accessibility
+│   ├── 04-genre-playbooks/     # six genres with timeline templates
+│   ├── 05-copyright/       # copyright, fair use, licensing, platforms
+│   ├── 06-delivery-qc/       # technical QC, content compliance, checklists
+│   ├── 07-tools-and-resources/     # software, assets, licensing caveats
+│   ├── 08-rsi/      # reference evaluation, fingerprints, feedback loop
+│   └── 09-material-memory/       # clip description cards and cache protocol
 └── scripts/
     ├── material_cache.py     # fingerprint / lookup / register / use / verify / stats
     ├── reference_probe.sh    # cut points, shot lengths, loudness, color, contact sheets
@@ -98,7 +98,7 @@ All three are deliberately dependency-light and have been verified end to end on
 SK="$HOME/.workbuddy/skills/super-video-cut"
 
 # Cache the description of a clip once, reuse it across topics
-export MDC_HOME="$PWD/素材缓存"
+export MDC_HOME="$PWD/material-cache"
 python "$SK/scripts/material_cache.py" lookup "clip.mp4"
 
 # Measure a reference edit's objective signature
@@ -108,11 +108,11 @@ bash "$SK/scripts/reference_probe.sh" "reference.mp4" "probe_out"
 bash "$SK/scripts/qc_scan.sh" "final.mp4" "qc_out"
 ```
 
-`material_cache.py` writes to `$MDC_HOME` (default `./素材缓存`), never into the skill directory.
+`material_cache.py` writes to `$MDC_HOME` (default `./material-cache`), never into the skill directory.
 
 ## Evidence, not authority
 
-Numbers in this repository carry an evidence grade: **A** official standard or statute, **B** vendor documentation, **C** academic, **D** secondary reporting. Anything uncertain is marked as to-be-verified rather than stated as fact. See `references/00-总览/资料来源与可信度.md`.
+Numbers in this repository carry an evidence grade: **A** official standard or statute, **B** vendor documentation, **C** academic, **D** secondary reporting. Anything uncertain is marked as to-be-verified rather than stated as fact. See `references/00-overview/sources-and-reliability.md`.
 
 ## Scope and limits
 

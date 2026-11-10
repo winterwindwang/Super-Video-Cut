@@ -1,176 +1,178 @@
 ---
 name: super-video-cut
-description: 完整的视频剪辑交付技能，覆盖参考爆款风格的多维评估（剪辑手法、音效、场景，逐项给出观察—依据—推断—动作—置信度说明）、素材记忆与去重（一次模型分析、多主题复用、避免重复请求视频模型）、剪辑方案与时间线映射、配音混音与响度合规、字幕制作与排版、六类视频的差异化剪法、成片技术审查与二创版权自查。当用户要求剪辑/剪片/混剪/二创、参考某个视频或爆款风格来剪、加字幕或配音、调色、导出平台规格、审查成片、判断素材或二创是否侵权时使用本技能。内含可直接运行的 ffmpeg/ffprobe 命令、EBU R128 与 ITU-R BS.1770 响度目标、W3C WebVTT 等字幕格式标准、中国著作权法与欧美 fair use/DMCA 规则。
+description: End-to-end video editing delivery skill covering multi-dimensional evaluation of a reference/viral video's style (editing craft, sound, scene — each item justified with observation-evidence-inference-action-confidence), material memory and deduplication (analyse footage once, reuse the description across topics, avoid re-requesting a vision model), edit plans and timeline mapping, voice-over mixing and loudness compliance, subtitle production and layout, differentiated cutting for six video genres, delivery QC, and derivative-work copyright self-checks. Use when asked to edit or re-cut a video, do a mashup or derivative edit, match a reference or viral video's style, add subtitles or voice-over, grade colour, export to platform specs, QC a finished cut, or judge whether footage or a derivative edit infringes copyright. Ships runnable ffmpeg/ffprobe commands, EBU R128 and ITU-R BS.1770 loudness targets, W3C WebVTT and other subtitle format standards, and Chinese copyright law alongside US/EU fair use and DMCA rules.
 agent_created: true
 ---
 
-# 视频剪辑大师
+# Super-Video-Cut
 
-## 定位
+## Positioning
 
-把一次剪辑任务当作**有证据链的工程交付**，而不是凭感觉拼片段。本技能提供：可复现的客观测量、逐项带说明的评估、可套用的时间线模板、交付前审查，以及贯穿全程的版权边界。
+Treat every editing job as **an engineering delivery with an evidence chain**, not a pile of clips assembled by feel. This skill supplies reproducible objective measurement, itemised and justified evaluation, reusable timeline templates, pre-delivery QC, and copyright boundaries that run through the whole process.
 
-`references/` 下是按能力域分卷的深度资料（约 50 份，多为 100–250 行的参数表与规范）。**不要预读全部**——按下方路由只读当前阶段需要的 1–3 份。
+`references/` holds the deep material, split by capability domain (about 50 documents, most of them 100–250-line parameter tables and specifications). **Do not pre-read all of it** — follow the routing below and read only the 1–3 documents the current stage needs.
 
-## 三条红线
+Volume shorthand used throughout this file: `09/02` means `references/09-material-memory/02-*.md`.
 
-违反任意一条，不得交付。
+## Three red lines
 
-1. **参考风格：先评估，后出片。** 用户给出参考视频时，必须先完成三维度评估（剪辑手法 / 音效 / 场景）并逐项给出说明，交用户确认后才可动手剪。未经确认直接产片 = 返工。
-2. **素材：先查缓存，再谈模型。** 分析任何视频素材前，先跑 `material_cache.py lookup`。命中即直接读素材描述卡，**禁止**再调用视频模型看一遍；未命中才做一次全量分析并登记。
-3. **合规与审查前置。** 版权风险未判定的方案不剪，`qc_scan.sh` 未过的成片不交。法规卷是参考资料，不构成法律意见；商用或高风险项目提示用户经法务复核。
+Violate any one of them and you must not deliver.
 
-## 主流程 M0–M6
+1. **Reference style: evaluate first, cut second.** When the user supplies a reference video, you must complete the three-dimension evaluation (editing craft / sound / scene) with an itemised justification for every entry, and get user confirmation before touching the timeline. Producing a cut without that confirmation counts as rework.
+2. **Footage: check the cache before you reach for a model.** Before analysing any video material, run `material_cache.py lookup`. On a hit, read the material description card directly — calling a video model to look again is **forbidden**; only on a miss do you run one full analysis and register it.
+3. **Compliance and QC come first.** Do not cut a plan whose copyright risk is undetermined, and do not hand over a finished file that `qc_scan.sh` has not passed. The legal volume is reference material, not legal advice; for commercial or high-risk projects, tell the user to have it reviewed by counsel.
 
-| 阶段 | 目标 | 必读 | 产出 |
+## Main workflow M0–M6
+
+| Stage | Goal | Must read | Output |
 | --- | --- | --- | --- |
-| M0 立项 | 锁定可执行参数 | 本文件 | 需求单 |
-| M1 素材入库 | 不重复花 token | `09/02` + `scripts/material_cache.py` | 素材卡或命中结果 |
-| M2 风格评估 | 把"感觉"变成参数 | `08/02`+`08/03`+`scripts/reference_probe.sh` | 评估表 + 指纹 + 一页结论 |
-| M3 剪辑方案 | 指纹→时间线 | `08/04` + 对应类型卷 | 秒级方案 |
-| M4 制作 | 剪/配/字幕/调色 | `01`/`02`/`03` 按需 | 初剪与素材工程 |
-| M5 成片审查 | 技术+合规双过 | `06/01`+`06/02`+`06/03` | 审查表 + 检测日志 |
-| M6 反馈回流 | 只产候选不自动改规则 | `08/05` | 自进化记录 |
+| M0 Intake | Lock down executable parameters | This file | Brief |
+| M1 Footage intake | Never pay for the same tokens twice | `09/02` + `scripts/material_cache.py` | Material card or cache hit |
+| M2 Style evaluation | Turn "a feeling" into parameters | `08/02` + `08/03` + `scripts/reference_probe.sh` | Evaluation sheet + fingerprint + one-page conclusion |
+| M3 Edit plan | Fingerprint → timeline | `08/04` + the matching genre volume | Second-level plan |
+| M4 Production | Cut / voice / subtitles / grade | `01` / `02` / `03` as needed | Rough cut and project |
+| M5 Delivery QC | Technical + compliance pass | `06/01` + `06/02` + `06/03` | QC report + detection logs |
+| M6 Feedback | Produce candidates only, never auto-change rules | `08/05` | Self-improvement record |
 
-### M0 立项：缺失参数必须问，最多 3 个问题
+### M0 Intake: ask for missing parameters, at most 3 questions
 
-必须拿到：**平台与画幅**（决定安全区与时长）、**总时长**、**是否需要口播/配音**、**是否商用**、**交付规格**（分辨率/码率/封装）。
+You must obtain: **platform and aspect ratio** (determines safe area and duration), **total duration**, **whether voice-over/dubbing is needed**, **whether it is commercial**, **delivery spec** (resolution / bitrate / container).
 
-可从已有信息推断的先推断并声明，不要逐项追问。是否商用直接决定音乐与素材的可用范围——这一项不确定时必须问。
+Infer and state anything that can be inferred from what you already have; do not interrogate the user item by item. Whether the work is commercial directly determines which music and footage you may use — if that is unclear, you must ask.
 
-### M1 素材入库：五种状态的行动是硬编码的
+### M1 Footage intake: the action for each of the five states is hard-coded
 
 ```bash
 SK="$HOME/.workbuddy/skills/super-video-cut"
-export MDC_HOME="$PWD/素材缓存"     # 缓存放项目内，不要写进 skill 目录
-python "$SK/scripts/material_cache.py" lookup "<素材路径>"
+export MDC_HOME="$PWD/material-cache"     # keep the cache inside the project, never inside the skill directory
+python "$SK/scripts/material_cache.py" lookup "<footage path>"
 ```
 
-| 状态 | 动作 |
+| State | Action |
 | --- | --- |
-| `HIT` | **禁止调用视频模型**。读 `$MDC_HOME/cards/<MID>.yaml`，只做主题适配 |
-| `MISS` | 本地 E1 探测 → 用 `09/模板/模型分析提示词.md` 做**一次**全量请求 → 填卡 → `validate` → `register` |
-| `STALE` | 素材已变，旧卡标 `superseded`，按 MISS 重做 |
-| `HIT_BLOCKED` | 授权状态未 clearing，不得采用；先解决授权 |
-| kill switch | `_config.json` 的 `cache_enabled=false` 时一律按 MISS，禁止绕开 |
+| `HIT` | **Do not call a video model.** Read `$MDC_HOME/cards/<MID>.yaml` and do topic adaptation only |
+| `MISS` | Local E1 probe → **one** full analysis request using `references/09-material-memory/templates/model-analysis-prompt.md` → fill the card → `validate` → `register` |
+| `STALE` | The footage changed; mark the old card `superseded` and redo as a MISS |
+| `HIT_BLOCKED` | Rights status is not cleared; do not use it — resolve the rights first |
+| kill switch | When `_config.json` has `cache_enabled=false`, treat everything as MISS; bypassing it is forbidden |
 
-描述卡分三层：L0 身份（哈希/规格）、L1 素材描述（讲了什么 / 在哪拍 / 什么风格 / 能不能用）、L2 主题适配（这个主题取哪几秒、当什么叙事角色）。**"适合做某主题开场"只能写 L2**，写进 L1 会污染其余所有主题。
+The description card has three layers: L0 identity (hash / specs), L1 material description (what it shows / where it was shot / what the style is / whether it is usable), L2 topic adaptation (which seconds this topic takes, and what narrative role they play). **"Works well as the opening for topic X" belongs in L2 only** — putting it in L1 contaminates every other topic.
 
-地点字段是硬规则：无画面文字、地标或拍摄记录时 `place_name: null`，禁止从"有海有椰子树"推断城市。
+The location field is a hard rule: without on-screen text, a landmark, or a shooting record, set `place_name: null`. Never infer a city from "there is sea and a palm tree".
 
-### M2 风格评估：用户给了参考视频就走这六步
+### M2 Style evaluation: six steps whenever the user supplies a reference video
 
 ```
-S1 合规前置 → S2 客观探测 → S3 通看两遍 → S4 逐维度评估
-→ S5 一页结论 → S6 ★用户确认门★
+S1 compliance pre-check → S2 objective probe → S3 two full viewings → S4 dimension-by-dimension evaluation
+→ S5 one-page conclusion → S6 ★user confirmation gate★
 ```
 
-- **S1** 只分析，不复用其表达。片头片尾、台词、音乐、花字、镜头调度一律标记为 `protected: expression`。
-- **S2** 跑探测脚本拿可复现数值（切点、镜头时长、响度、静音、色彩统计、抽帧拼图）。
-- **S3** 全片看两遍：一遍只看画面，一遍**只听声音**。快进抽样会漏掉节奏与留白，这是最常见的方法论错误。
-- **S4** 按 A 剪辑手法 / B 音效 / C 场景 三组核心维度（各 10 子项）逐项评估，另加 D 字幕、E 叙事、F 平台语境、**G 合规边界（强制）**。
-- **S5** 输出一页结论：3 条关键特征、3 条不可迁移项、整体置信度。
-- **S6** 交用户确认。**未确认不得进入 M3。**
+- **S1** Analyse only, never reuse its expression. Opening and closing titles, dialogue, music, kinetic text, and shot staging are all tagged `protected: expression`.
+- **S2** Run the probe script for reproducible numbers (cut points, shot lengths, loudness, silence, colour statistics, contact sheets).
+- **S3** Watch the whole thing twice: once for picture only, once **for sound only**. Skipping through at speed loses rhythm and held beats — this is the most common methodological error.
+- **S4** Evaluate item by item across the three core groups — A editing craft / B sound / C scene (10 sub-items each) — plus D subtitles, E narrative, F platform context, and **G compliance boundary (mandatory)**.
+- **S5** Deliver a one-page conclusion: 3 key characteristics, 3 non-transferable items, overall confidence.
+- **S6** Hand it to the user for confirmation. **Without that confirmation you may not enter M3.**
 
-**每条评估必须写满五段，缺一段整条作废：**
+**Every evaluation entry must fill all five parts; a missing part voids the whole entry:**
 
-> ①观察（时间码+具体现象）②依据（证据编号）③推断（为什么这么设计）④动作项（本片怎么用）⑤置信度（高/中/低 + 理由）
+> ① Observation (timecode + concrete phenomenon) ② Basis (evidence ID) ③ Inference (why it was designed this way) ④ Action item (how this cut uses it) ⑤ Confidence (high/medium/low + reason)
 
-反例（禁止输出）："剪辑很流畅，很有电影感。"——无时间码、无依据、无动作项，不可执行。
+Counter-example (must never be output): "The editing is smooth and very cinematic." — no timecode, no basis, no action item, nothing executable.
 
-动作项必须打迁移标：`transferable: parameter`（节奏、时长、响度、景别序列等可学）或 `protected: expression`（具体镜头、台词、音乐、花字不可复制）。**风格与套路属思想层面可借鉴，表达不可复制**——这是本技能的版权底线，不是建议。
+Every action item must carry a transfer tag: `transferable: parameter` (rhythm, duration, loudness, shot-size sequence — learnable) or `protected: expression` (specific shots, dialogue, music, kinetic text — not reproducible). **Style and formula sit in the realm of ideas and may be borrowed; expression may not be copied.** That is this skill's copyright floor, not a suggestion.
 
-### M3 剪辑方案：把指纹翻译成秒级时间线
+### M3 Edit plan: translate the fingerprint into a second-level timeline
 
-读 `08/04` 的映射规则，产出可直接执行的时间线：每个片段的入出点、景别、切换方式与帧数、音效点位、字幕出入点、响度目标。
+Read the mapping rules in `08/04` and produce a directly executable timeline: in/out point for every clip, shot size, transition type and duration in frames, sound-effect cue points, subtitle in/out points, and loudness target.
 
-冲突消解顺序：**用户明确要求 > 平台硬限制 > 参考片特征 > 默认美学**。素材不足时明说"参考片某手法本片无对应素材，以 X 替代"，不要硬凑。
+Conflict resolution order: **explicit user request > hard platform limits > reference-video characteristics > default aesthetics**. When the footage cannot support something, say so plainly — "the reference uses technique X; this project has no matching footage, so Y replaces it" — rather than forcing it.
 
-### M4 制作：按当前动作只读一卷
+### M4 Production: read exactly one volume per current action
 
-| 在做 | 读 |
+| Doing | Read |
 | --- | --- |
-| 剪节奏、转场、轴线 | `01/01`、`01/02` |
-| 工程组织、代理、回批、交付 | `01/03` |
-| 调色、Log/LUT、HDR | `01/04` |
-| 配音录制、发声、ADR | `02/01` |
-| 混音、响度、EQ/压缩 | `02/02` |
-| 配乐、音效、声音设计 | `02/03` |
-| AI 配音、TTS、SSML | `02/04` |
-| 字幕排版与时长 | `03/01` |
-| SRT/VTT/ASS/TTML 格式 | `03/02` |
-| 转写、对齐、硬烧 | `03/03` |
-| 多语言、CC/SDH、无障碍 | `03/04` |
-| 某类型片怎么剪 | `04/01`–`04/06` |
+| Rhythm, transitions, axis | `01/01`, `01/02` |
+| Project organisation, proxies, conform, delivery | `01/03` |
+| Colour grading, Log/LUT, HDR | `01/04` |
+| Voice recording, delivery, ADR | `02/01` |
+| Mixing, loudness, EQ/compression | `02/02` |
+| Score, sound effects, sound design | `02/03` |
+| AI voice, TTS, SSML | `02/04` |
+| Subtitle layout and duration | `03/01` |
+| SRT/VTT/ASS/TTML formats | `03/02` |
+| Transcription, alignment, burn-in | `03/03` |
+| Multilingual, CC/SDH, accessibility | `03/04` |
+| How to cut a specific genre | `04/01`–`04/06` |
 
-响度锚点（详细目标表见 `02/02`）：流媒体约 −14 LUFS、播客/苹果约 −16 LUFS、广播 EBU R128 为 −23 LUFS，True Peak 普遍要求 ≤ −1 dBTP。**以目标平台官方文档为准**，不确定就测量后再定。
+Loudness anchors (full target table in `02/02`): streaming around −14 LUFS, podcast/Apple around −16 LUFS, broadcast EBU R128 at −23 LUFS, with True Peak generally required at ≤ −1 dBTP. **Defer to the target platform's official documentation**; if unsure, measure first, then decide.
 
-### M5 成片审查：脚本先跑，人再判
+### M5 Delivery QC: run the script first, then judge as a human
 
 ```bash
-bash "$SK/scripts/qc_scan.sh" "<成片>" "<输出目录>"
+bash "$SK/scripts/qc_scan.sh" "<finished file>" "<output directory>"
 ```
 
-一次输出规格 JSON、解码完整性、黑场/冻帧、静音、响度与抽帧拼图。脚本只能发现**技术异常**，内容与合规必须人工过表：
+One run yields a spec JSON, decode integrity, black-frame/freeze detection, silence, loudness, and a contact sheet. The script can only find **technical anomalies** — content and compliance must go through the tables by hand:
 
-- `06/01` 技术规格清单（分辨率/帧率/色彩/码率/音轨/时长/命名）
-- `06/02` 内容与合规审查（事实、敏感内容、广告法禁用词、版权凭证）
-- `06/03` 表 A–G 填写模板（存档用）
+- `06/01` technical specification checklist (resolution / frame rate / colour / bitrate / audio tracks / duration / naming)
+- `06/02` content and compliance review (facts, sensitive content, prohibited advertising claims, rights documentation)
+- `06/03` Tables A–G fill-in templates (for the archive)
 
-审查分级：**阻断项**（黑帧、无音轨、响度超标、侵权风险）必须修复；**改进项**记录后可交付；**建议项**留待下版。
+QC severity: **blocking** (black frames, missing audio track, loudness out of tolerance, infringement risk) must be fixed; **improvement** items may ship once logged; **suggestion** items wait for the next version.
 
-### M6 反馈回流：一次爆款不改规则
+### M6 Feedback loop: one hit video never changes a rule
 
-拿到真实反馈（完播、转化、客户意见）后，按 `08/05` 做误差归因，写入 `08/案例库/<CASE-ID>/自进化记录.md`。
+Once real feedback arrives (completion rate, conversion, client notes), do error attribution per `08/05` and write it to `08/case-library/<CASE-ID>/self-improvement-record.md`.
 
-硬规则：单案例只产生**候选**；需 ≥5 同向样本、冻结回归集、人工签字、版本化、灰度后才生效。自进化引擎**不得自动改写**素材描述卡的 E1/E2 客观字段——缓存会把一次错误扩散到之后所有主题，而命中记录看起来完全正常。
+Hard rule: a single case produces **candidates** only; a change takes effect only after ≥5 same-direction samples, a frozen regression set, human sign-off, versioning, and a canary release. The self-improvement engine **must not automatically rewrite** the E1/E2 objective fields of a material description card — the cache would spread one error across every later topic, while the hit records still look perfectly normal.
 
-## 触发即执行的最短路径
+## Shortest path once triggered
 
-| 用户说 | 直接做 |
+| The user says | Do this |
 | --- | --- |
-| "参考这个爆款剪一条" | M2 全流程 → S6 确认门，**不要先剪** |
-| "帮我把这条视频剪一下" | M0 问平台/时长/商用 → M1 素材 → M3 方案 |
-| "这些素材能用吗、讲了什么" | M1 `lookup`，HIT 直接答，MISS 才分析 |
-| "加字幕" | `03/01` 排版 + `03/03` 转写对齐；核对阅读速度与最短停留 |
-| "配音/声音不好听" | `02/01` 录制 → `02/02` 处理链 → 测响度 |
-| "导出给抖音/视频号/B站" | `04/01` 平台规格 + `06/01` 交付核对 |
-| "这样剪会不会侵权" | `05/02` 决策树 + `08/02` G 维度；给风险分级不给结论性法律意见 |
-| "成片没问题吧" | `qc_scan.sh` + `06/01`/`06/02` 逐项 |
+| "Cut something in the style of this viral video" | Full M2 flow → S6 confirmation gate; **do not start cutting** |
+| "Edit this video for me" | M0 ask platform/duration/commercial → M1 footage → M3 plan |
+| "Is this footage usable, what does it show?" | M1 `lookup`; answer straight away on HIT, analyse only on MISS |
+| "Add subtitles" | `03/01` layout + `03/03` transcription and alignment; check reading speed and minimum duration |
+| "The voice-over sounds bad" | `02/01` recording → `02/02` processing chain → measure loudness |
+| "Export for Douyin / WeChat Channels / Bilibili" | `04/01` platform specs + `06/01` delivery check |
+| "Would this edit infringe anything?" | `05/02` decision tree + dimension G in `08/02`; give a risk tier, not a conclusive legal opinion |
+| "Is the finished cut OK?" | `qc_scan.sh` + `06/01` / `06/02` item by item |
 
-## 脚本
+## Scripts
 
-| 脚本 | 用途 | 依赖 |
+| Script | Purpose | Dependencies |
 | --- | --- | --- |
-| `scripts/material_cache.py` | 素材指纹、缓存查询、登记、复用、校验、统计（8 个子命令） | Python 3，零第三方 |
-| `scripts/reference_probe.sh` | 参考片/素材客观探测：切点、镜头时长、响度、静音、色彩、抽帧拼图 | bash + ffmpeg/ffprobe |
-| `scripts/qc_scan.sh` | 成片技术审查：规格、解码、黑场、冻帧、静音、响度、拼图 | bash + ffmpeg/ffprobe |
+| `scripts/material_cache.py` | Footage fingerprint, cache lookup, registration, reuse, validation, statistics (8 subcommands) | Python 3, no third-party packages |
+| `scripts/reference_probe.sh` | Objective probe of a reference or footage file: cut points, shot lengths, loudness, silence, colour, contact sheets | bash + ffmpeg/ffprobe |
+| `scripts/qc_scan.sh` | Technical QC of a finished file: specs, decode, black frames, freezes, silence, loudness, contact sheet | bash + ffmpeg/ffprobe |
 
-先确认环境：`ffmpeg -version && ffprobe -version && python --version`。缺 ffmpeg 时客观测量全部不可用——此时明确告知用户"只能做人工评估，无法给出可复现指标"，不要伪造数值。
+Check the environment first: `ffmpeg -version && ffprobe -version && python --version`. Without ffmpeg every objective measurement is unavailable — in that case tell the user plainly that only manual evaluation is possible and no reproducible metrics can be given. Never fabricate numbers.
 
-## 交付前自检
+## Pre-delivery self-check
 
-- [ ] 参考片走过 S1–S6，用户已确认（若用了参考）
-- [ ] 每个素材都能在缓存里查到来源与授权状态
-- [ ] 评估/方案里没有"流畅""高级""有质感"这类无依据表述
-- [ ] 响度已实测并在目标容差内，True Peak 不超限
-- [ ] 字幕无溢出安全区、无错别字、阅读速度合规
-- [ ] `qc_scan.sh` 无阻断项，审查表 A–G 已填
-- [ ] 音乐/字体/肖像/素材授权凭证齐全，或已标注风险等级
-- [ ] 交付文件命名、封装、码率符合平台要求
+- [ ] The reference went through S1–S6 and the user has confirmed (if a reference was used)
+- [ ] Every piece of footage can be traced in the cache to its source and rights status
+- [ ] No unsupported phrases like "smooth", "premium", or "textured" appear in the evaluation or the plan
+- [ ] Loudness has been measured and sits inside the target tolerance; True Peak is under the limit
+- [ ] Subtitles do not overflow the safe area, contain no typos, and meet the reading-speed limit
+- [ ] `qc_scan.sh` reports no blocking items, and Tables A–G are filled in
+- [ ] Rights documentation for music / fonts / likeness / stock is complete, or the risk tier is stated
+- [ ] Delivery file naming, container, and bitrate match the platform requirements
 
-## 资料边界（必须向用户声明）
+## Scope of the material (must be stated to the user)
 
-- **法规卷不是法律意见。** 条款与司法口径会变化，商用/高风险项目请法务复核并以官方最新文本为准。
-- **平台参数会变。** 时长、码率、安全区、响度目标在不同来源存在冲突，一律标注"以平台最新官方文档为准"，交付前上传预览实测。
-- **自进化参数无行业标准。** `08` 卷的 η、δ、N_min 等是本库自定义初始值，仅让流程可运行，不是经过验证的最优参数。
-- **约 190 项"待核实"** 已在各文档正文或文末逐条列明，集中在 `references/00-总览/资料来源与可信度.md`（含证据分级 A/B/C/D 与 P0/P1/P2 优先级）。引用前先看该文件的证据等级。
+- **The legal volume is not legal advice.** Articles and judicial positions change; for commercial or high-risk projects have counsel review it and rely on the latest official text.
+- **Platform parameters change.** Duration, bitrate, safe area, and loudness targets conflict across sources, so they are always marked "subject to the platform's latest official documentation" — upload and preview to verify before delivery.
+- **The self-improvement parameters have no industry standard.** η, δ, N_min and the rest in volume `08` are this library's own starting values; they exist to make the process runnable, not because they are validated optima.
+- **About 190 "TO VERIFY" items** are itemised in the body or at the end of each document, concentrated in `references/00-overview/sources-and-reliability.md` (with A/B/C/D evidence grades and P0/P1/P2 priorities). Check that file's evidence grade before citing anything.
 
-## 路由与索引
+## Routing and indexes
 
-- `references/INDEX.md` — 按阶段/任务的最短路径与最小必读集
-- `references/00-总览/知识地图.md` — 全量能力域映射与故障速查
-- `references/00-总览/资料来源与可信度.md` — 证据分级、来源清单、待核实项
-- `references/00-总览/manifest.csv` — 机器可读文件清单
+- `references/INDEX.md` — shortest path and minimum required reading per stage or task
+- `references/00-overview/knowledge-map.md` — full capability-domain mapping and troubleshooting quick look-up
+- `references/00-overview/sources-and-reliability.md` — evidence grades, source list, TO VERIFY items
+- `references/00-overview/manifest.csv` — machine-readable file index
 
-检索大文件时用关键词定位而非通读，例如 `grep -n "LUFS" references/02-配音与音频/02-音频后期与混音规范.md`。
+When searching a large file, locate by keyword instead of reading it end to end, e.g. `grep -n "LUFS" references/02-audio-and-voice/02-audio-post-and-mixing.md`.

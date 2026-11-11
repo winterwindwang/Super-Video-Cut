@@ -44,6 +44,8 @@ INDEX.md,Navigation,Shortest-path routing by stage and task,index,2026-11-10,Rea
 08-rsi/templates/self-improvement-record.md,RSI self-evolution,Prediction vs. actual / attribution / candidates / gate record template,template,2026-11-10,A single case only produces a candidate
 ../scripts/reference_probe.sh,RSI self-evolution,Objective probe script for reference videos,script,2026-11-10,Verified end to end; avoid absolute metadata paths on Windows
 08-rsi/case-library/README.md,RSI self-evolution,Case index and rule version table,index,2026-11-10,No cases yet; no rule change may be approved before the frozen set exists
+08-rsi/07-keyframe-baseline.md,RSI self-improvement,Per-shot keyframe anchors and the structural diff tiers,guide,2026-11-11,Pixels are never compared; thresholds TO VERIFY
+../scripts/keyframe_diff.py,RSI self-improvement,Keyframe baseline and structural diff (extract / compare),script,2026-11-11,Zero dependency; exit 2 on blocking difference; tested end to end
 09-material-memory/README.md,Material memory,The P0 protocol for analysing once and reusing across topics plus the token saving,index,2026-11-10,Entry point
 09-material-memory/01-material-description-card-spec.md,Material memory,mdc-v1 field dictionary / E1-E4 / five-part rationale / V1-V8 validation,spec,2026-11-10,In-house conventions rather than an industry standard; includes a disclaimer
 09-material-memory/02-cache-reuse-protocol-and-token-savings.md,Material memory,Hit and invalidation state machine / content hashing / single-pass write / token accounting / concurrency and privacy,protocol,2026-11-10,Conflicting token-rate figures are marked TO VERIFY

@@ -37,10 +37,12 @@ reference video received
 | `04-fingerprint-to-edit-plan-mapping.md` | Conflict resolution P0–P7, field-by-field mapping, material downgrades, L4 deviation tolerance |
 | `05-feedback-loop-and-self-improvement.md` | Error attribution, candidate generation, the weight-update formula, the nine-step gate, drift prevention, the kill switch |
 | `06-case-library-and-version-governance.md` | Directory structure, naming, rule versions, audit log, rollback procedure |
+| `07-keyframe-baseline.md` | Per-shot keyframe anchors, what may and may not be compared, the blocking/warning tiers of the structural diff |
 | `templates/reference-video-evaluation.md` | **A 30+ item evaluation sheet you can fill in directly** |
 | `templates/style-fingerprint.yaml` | A copyable empty fingerprint |
 | `templates/self-improvement-record.md` | The feedback record for a single task |
 | `scripts/reference_probe.sh` | Objective metric probing (cut points / shot durations / loudness / silence / colour / contact sheets), tested |
+| `scripts/keyframe_diff.py` | Keyframe baseline (`extract`) and structural diff against it (`compare`), exit 2 on a blocking difference, tested |
 | `case-library/README.md` | Case index and configuration notes |
 
 ---

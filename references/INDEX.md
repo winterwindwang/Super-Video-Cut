@@ -36,7 +36,7 @@ grep -n "Article 24" "05-copyright/01-china-copyright-law-and-audiovisual-works.
 | `05-copyright` | 5 | copyright, derivative-work boundaries, music licensing, personality rights, platform rules | commercial use, derivative works, material of uncertain provenance |
 | `06-delivery-qc` | 3 | technical checklist, content compliance, review-form templates | M5, before delivery |
 | `07-tools-and-resources` | 2 | software ecosystem, stock-asset and font licensing | choosing tools, finding commercially usable assets |
-| `08-rsi` | 6 | three-dimension reference evaluation, fingerprints, mapping, self-improvement, governance | M2, M6 |
+| `08-rsi` | 7 | three-dimension reference evaluation, keyframe baseline, fingerprints, mapping, self-improvement, governance | M2, M5, M6 |
 | `09-material-memory` | 4 | material description cards, cache protocol, multi-topic governance, coordination | M1, and any occasion where material is reused |
 
 ## Minimum required reading by stage
@@ -70,6 +70,7 @@ Take a single volume from the "doing / reading" table in SKILL.md. Read one volu
 - `06-delivery-qc/02-content-and-compliance-review.md` — items that require human judgement
 - `06-delivery-qc/03-qc-report-templates.md` — archiving forms A–G
 - run `scripts/qc_scan.sh` first, then work through the form item by item
+- `08-rsi/07-keyframe-baseline.md` — diff the cut against the reference baseline; run `scripts/keyframe_diff.py compare`, exit 2 means fix
 
 **M6 Feedback loop**
 

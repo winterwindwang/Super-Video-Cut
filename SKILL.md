@@ -31,7 +31,7 @@ Violate any one of them and you must not deliver.
 | M2 Style evaluation | Turn "a feeling" into parameters | `08/02` + `08/03` + `scripts/reference_probe.sh` | Evaluation sheet + fingerprint + one-page conclusion |
 | M3 Edit plan | Fingerprint → timeline | `08/04` + the matching genre volume | Second-level plan |
 | M4 Production | Cut / voice / subtitles / grade | `01` / `02` / `03` as needed | Rough cut and project |
-| M5 Delivery QC | Technical + compliance pass | `06/01` + `06/02` + `06/03` | QC report + detection logs |
+| M5 Delivery QC | Technical + compliance pass, then diff against the reference | `06/01` + `06/02` + `06/03` + `08/07` | QC report + diff report + paired sheet |
 | M6 Feedback | Produce candidates only, never auto-change rules | `08/05` | Self-improvement record |
 
 ### M0 Intake: ask for missing parameters, at most 3 questions
@@ -69,6 +69,7 @@ S1 compliance pre-check → S2 objective probe → S3 two full viewings → S4 d
 
 - **S1** Analyse only, never reuse its expression. Opening and closing titles, dialogue, music, kinetic text, and shot staging are all tagged `protected: expression`.
 - **S2** Run the probe script for reproducible numbers (cut points, shot lengths, loudness, silence, colour statistics, contact sheets).
+- **S2b** Record the keyframe baseline while the reference is in front of you — `keyframe_diff.py extract`. It stamps one keyframe per shot plus its luma/saturation, so the finished cut can be diffed against it later instead of argued about from memory. Fill `shot_size` and `composition` in `shots.csv` by hand; the tool measures, it does not interpret.
 - **S3** Watch the whole thing twice: once for picture only, once **for sound only**. Skipping through at speed loses rhythm and held beats — this is the most common methodological error.
 - **S4** Evaluate item by item across the three core groups — A editing craft / B sound / C scene (10 sub-items each) — plus D subtitles, E narrative, F platform context, and **G compliance boundary (mandatory)**.
 - **S5** Deliver a one-page conclusion: 3 key characteristics, 3 non-transferable items, overall confidence.
@@ -119,6 +120,15 @@ One run yields a spec JSON, decode integrity, black-frame/freeze detection, sile
 - `06/02` content and compliance review (facts, sensitive content, prohibited advertising claims, rights documentation)
 - `06/03` Tables A–G fill-in templates (for the archive)
 
+**Then diff the finished cut against the reference baseline** (skip only if there was no reference):
+
+```bash
+python "$SK/scripts/keyframe_diff.py" extract "<finished file>" --out case/mine_kfs
+python "$SK/scripts/keyframe_diff.py" compare case/ref_kfs case/mine_kfs --out case/diff
+```
+
+Exit code 2 means blocking: the shot count, the runtime or a cut position is off by more than tolerance. Read `case/diff/diff_report.md` for the verdict, then open `diff_sheet.png` — one row per shot, left is the reference, right is your cut. **Pixels are never compared**; the diff judges structure and the systematic image profile, and leaves composition to your eyes. Warnings are prompts to look, not defects; record what you decided.
+
 QC severity: **blocking** (black frames, missing audio track, loudness out of tolerance, infringement risk) must be fixed; **improvement** items may ship once logged; **suggestion** items wait for the next version.
 
 ### M6 Feedback loop: one hit video never changes a rule
@@ -139,6 +149,7 @@ Hard rule: a single case produces **candidates** only; a change takes effect onl
 | "Export for Douyin / WeChat Channels / Bilibili" | `04/01` platform specs + `06/01` delivery check |
 | "Would this edit infringe anything?" | `05/02` decision tree + dimension G in `08/02`; give a risk tier, not a conclusive legal opinion |
 | "Is the finished cut OK?" | `qc_scan.sh` + `06/01` / `06/02` item by item |
+| "Does my cut actually match the reference?" | `keyframe_diff.py compare`, read `diff_report.md`, then judge `diff_sheet.png` row by row |
 
 ## Scripts
 
@@ -147,6 +158,7 @@ Hard rule: a single case produces **candidates** only; a change takes effect onl
 | `scripts/material_cache.py` | Footage fingerprint, cache lookup, registration, reuse, validation, statistics (8 subcommands) | Python 3, no third-party packages |
 | `scripts/reference_probe.sh` | Objective probe of a reference or footage file: cut points, shot lengths, loudness, silence, colour, contact sheets | bash + ffmpeg/ffprobe |
 | `scripts/qc_scan.sh` | Technical QC of a finished file: specs, decode, black frames, freezes, silence, loudness, contact sheet | bash + ffmpeg/ffprobe |
+| `scripts/keyframe_diff.py` | Per-shot keyframe baseline (`extract`) and structural diff against it (`compare`); exit 2 on a blocking difference | Python 3, no third-party packages |
 
 Check the environment first: `ffmpeg -version && ffprobe -version && python --version`. Without ffmpeg every objective measurement is unavailable — in that case tell the user plainly that only manual evaluation is possible and no reproducible metrics can be given. Never fabricate numbers.
 

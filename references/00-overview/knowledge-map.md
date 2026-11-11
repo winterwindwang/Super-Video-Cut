@@ -55,7 +55,7 @@ flowchart LR
 | --- | --- | --- |
 | **Material memory and analysis** | `09-material-memory/README.md` P0 protocol + `scripts/material_cache.py lookup` | Only on a miss, run one full analysis with `09-material-memory/templates/model-analysis-prompt.md`; `09/01` fields and V1–V8 |
 | **Multi-topic reuse** | `09-material-memory/03` + `use` / `themes` / `stats` | Topic adaptation layer kept separate from the MDC; rights re-checked for each topic |
-| **Style reference and evaluation** | `08-rsi/02` + `08-rsi/templates/reference-video-evaluation.md` | `scripts/reference_probe.sh`; `08/03` fingerprint; **S6 user confirmation gate** |
+| **Style reference and evaluation** | `08-rsi/02` + `08-rsi/templates/reference-video-evaluation.md` | `scripts/reference_probe.sh`; `scripts/keyframe_diff.py extract` for the per-shot baseline; `08/03` fingerprint; **S6 user confirmation gate** |
 | Project kickoff | `04-genre-playbooks/0X` (pick the matching genre, read its metrics and structure template) | `01-editing-craft/03` project standards |
 | Assets and project setup | `01-editing-craft/03-editing-workflow-and-project-standards.md` | `07-tools-and-resources/02` asset licensing; `09/01` `edit_notes` |
 | Rough cut / fine cut | `01-editing-craft/01`, `02` | `04-genre-playbooks/0X` beat sheet; `08/04` mapping scheme |
@@ -63,7 +63,7 @@ flowchart LR
 | Subtitles | `03-subtitles/01`→`02`→`03` (`04` for multilingual or accessibility work) | `06-delivery-qc/03` Table E; `09/01` `onscreen_text` |
 | Grading | `01-editing-craft/04-color-grading-and-image-quality.md` | `06-delivery-qc/01` colour-tagging check |
 | **Rights pre-check** | `05-copyright/02`, `03`, `04` | `08/01` §6, how far a style may be borrowed; `06/02` Table C ledger; `09/01` `rights_status` |
-| Final review | `06-delivery-qc/01` + `02` + `03` | `qc_scan.sh` scans the film automatically; `08/04` §6 L4 deviation comparison; `09` `verify` |
+| Final review | `06-delivery-qc/01` + `02` + `03` | `qc_scan.sh` scans the film automatically; `08/07` keyframe diff against the reference; `08/04` §6 L4 deviation comparison; `09` `verify` |
 | Delivery | `06-delivery-qc/03` archive checklist | `01-editing-craft/03` backup standards |
 | **Feedback and evolution** | `08-rsi/05` + `08-rsi/templates/self-improvement-record.md` | `08/06` version governance; `09/04` new meta-metrics and guardrail 8 |
 
